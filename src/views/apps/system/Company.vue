@@ -752,7 +752,7 @@ export default {
  
     }, 
 
-    updateCompany(id){
+    updateCompany(id){      
       let loadingInstance  = Loading.service({ fullscreen: true });
       let me = this;
       let objeto = {
@@ -786,11 +786,16 @@ export default {
       });
 
       //Recorro las pantallas
+
       me.screensactive.forEach(screen => {
+        let orden =0;
+         if (screen.orden!=null){
+                orden=parseInt(screen.orden);
+          }        
          let objScreen= {
            Description: screen.description,
            Enabled: screen.enabled,
-           Orden: screen.orden,
+           Orden: orden,
            Icon: screen.icon,
            SystemScreenId: screen.id,
            ConfigScreenFields: [],
@@ -804,15 +809,15 @@ export default {
                 orden=parseInt(field.orden);
               }
               let objField= {
-                ConfigScreenId: screen.id,
-                Name: field.name,
-                Required: field.required,
-                Visible: field.visible,
-                DefaultValue: field.defaultValue,
-                Enabled: field.enabled,
-                FieldName: field.fieldName,
-                Orden: orden,
-                SystemScreenFieldId: field.id
+                  ConfigScreenId: screen.id,
+                  Name: field.name,
+                  Required: field.required,
+                  Visible: field.visible,
+                  DefaultValue: field.defaultValue,
+                  Enabled: field.enabled,
+                  FieldName: field.fieldName,
+                  Orden: orden,
+                  SystemScreenFieldId: field.id
                 }                
                 objScreen.ConfigScreenFields.push(objField);
             });
@@ -860,10 +865,8 @@ export default {
       objeto.SecurityRoles.push(objRol);  
       });
 
-      
 
-      axios
-        .post(this.URL_UPDATE_COMPANY, objeto)
+      axios.post(this.URL_UPDATE_COMPANY, objeto)
         .then(function(response) {
           me.isOk = true;
           loadingInstance.close();
@@ -981,8 +984,7 @@ export default {
 
       
 
-      axios
-        .post(this.URL_CREATE_COMPANY, objeto)
+      axios.post(this.URL_CREATE_COMPANY, objeto)
         .then(function(response) {
           me.isOk = true;
           loadingInstance.close();

@@ -11,12 +11,15 @@ import System from '../router/system'
 import Login from '../views/pages/authentication/Login.vue'
 import Profile from '../views/pages/Profile.vue'
 import NotFound from '../views/pages/NotFound.vue'
+import Provider from '../views/pages/Provider.vue'
+import Customer from '../views/pages/Customer.vue'
+import Product from '../views/pages/Product.vue'
+
 import Vehicles from '../views/pages/Vehicles.vue'
 import Devices from '../views/pages/Devices.vue'
 
 
-//ui
-import Visor from '../views/ui/Maps/GMap.vue'
+
 
 import layouts from '../layout'
 import store from '../store'
@@ -41,16 +44,56 @@ const router = new Router({
 			}
 		},
 		{
-			path: '/visor',
-			name: 'visor',
-			component: Visor,
+			path: '/product',
+			name: 'product',
+			component: Product,
 			meta: {
 				auth: true,
-//				layout: layouts.navLeft,
-				layout: layouts.contenOnlyNothing,				
-				//searchable: true,
-				title: 'Visor',
-				tags: ['app']
+				layout: layouts.navLeft,
+				//layout: layouts.contenOnlyNothing,				
+				searchable: true,
+				URL_GET: 'api/Customers/',
+				URL_CREATE: 'api/Customers/Create',
+				URL_UPDATE: 'api/Customers/Update',
+				URL_DELETE: 'api/Customers/Delete',	
+				URL_GET_DOCUMENT_TYPE: 'api/DocumentTypes/',
+				URL_GET_PRICE_LIST: 'api/PriceLists/',
+				URL_CITIES: 'api/Countries/GetFull/'
+			}
+		},			
+		{
+			path: '/customer',
+			name: 'customer',
+			component: Customer,
+			meta: {
+				auth: true,
+				layout: layouts.navLeft,
+				//layout: layouts.contenOnlyNothing,				
+				searchable: true,
+				URL_GET: 'api/Customers/',
+				URL_CREATE: 'api/Customers/Create',
+				URL_UPDATE: 'api/Customers/Update',
+				URL_DELETE: 'api/Customers/Delete',	
+				URL_GET_DOCUMENT_TYPE: 'api/DocumentTypes/',
+				URL_GET_PRICE_LIST: 'api/PriceLists/',
+				URL_CITIES: 'api/Countries/GetFull/'
+			}
+		},		
+		{
+			path: '/provider',
+			name: 'provider',
+			component: Provider,
+			meta: {
+				auth: true,
+				layout: layouts.navLeft,
+				//layout: layouts.contenOnlyNothing,				
+				searchable: true,
+				URL_GET: 'api/Providers/',
+				URL_CREATE: 'api/Providers/Create',
+				URL_UPDATE: 'api/Providers/Update',
+				URL_DELETE: 'api/Providers/Delete',	
+				URL_GET_DOCUMENT_TYPE: 'api/DocumentTypes/',
+				URL_CITIES: 'api/Countries/GetFull/'
 			}
 		},
 		{
