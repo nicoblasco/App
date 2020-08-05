@@ -6,6 +6,7 @@ import Dashboard from '../views/apps/Dashboard.vue'
 import Admin from '../router/admin'
 import Tipification from '../router/typifications'
 import System from '../router/system'
+import Product from '../router/product'
 
 //pages
 import Login from '../views/pages/authentication/Login.vue'
@@ -13,7 +14,6 @@ import Profile from '../views/pages/Profile.vue'
 import NotFound from '../views/pages/NotFound.vue'
 import Provider from '../views/pages/Provider.vue'
 import Customer from '../views/pages/Customer.vue'
-import Product from '../views/pages/Product.vue'
 
 import Vehicles from '../views/pages/Vehicles.vue'
 import Devices from '../views/pages/Devices.vue'
@@ -41,24 +41,6 @@ const router = new Router({
 				layout: layouts.navLeft,
 				searchable: true,
 				tags: ['app']
-			}
-		},
-		{
-			path: '/product',
-			name: 'product',
-			component: Product,
-			meta: {
-				auth: true,
-				layout: layouts.navLeft,
-				//layout: layouts.contenOnlyNothing,				
-				searchable: true,
-				URL_GET: 'api/Customers/',
-				URL_CREATE: 'api/Customers/Create',
-				URL_UPDATE: 'api/Customers/Update',
-				URL_DELETE: 'api/Customers/Delete',	
-				URL_GET_DOCUMENT_TYPE: 'api/DocumentTypes/',
-				URL_GET_PRICE_LIST: 'api/PriceLists/',
-				URL_CITIES: 'api/Countries/GetFull/'
 			}
 		},			
 		{
@@ -154,7 +136,8 @@ const router = new Router({
 		},
 		Admin,
 		Tipification,
-		System
+		System,
+		Product
 	]
 })
 

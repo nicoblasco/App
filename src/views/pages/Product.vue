@@ -8,14 +8,25 @@
 						close filter
 					</button>
 				</div>
+				<div>
+					<el-button class="btnNuevoProducto" type="primary" plain @click="openDialog(null)">NUEVO PRODUCTO</el-button>
+				</div>
 				<div class="widget">
-					<div class="title">Category</div>
+					<div class="title">Busqueda rápida</div>
 					<div class="content">
-						<el-tree :data="treeData" :props="treeProps" node-key="id" :default-expanded-keys="[1]"></el-tree>
+						<el-input size="mini" placeholder="CÓDIGO"  clearable> </el-input>
+						<div style="margin: 10px 0;"></div>
+						<el-input size="mini" placeholder="DESCRIPCIÓN"  clearable> </el-input>
+					</div>
+				</div>				
+				<div class="widget">
+					<div class="title">Categorias</div>
+					<div class="content">
+						<el-tree :data="categories" :props="treeProps" node-key="id" :default-expanded-keys="[1]"></el-tree>
 					</div>
 				</div>
 				<div class="widget">
-					<div class="title">Price</div>
+					<div class="title">Precio</div>
 					<div class="content">
 						<el-slider
 							v-model="range"
@@ -30,20 +41,25 @@
 					</div>
 				</div>
 				<div class="widget select-color">
-					<div class="title">Colors</div>
+					<div class="title">Marcas</div>
 					<div class="content">
-						<ul>
-							<li><div class="color-box" style="background: #343a40;"></div> Black</li>
-							<li><div class="color-box" style="background: #788db4;"></div> Grey</li>
-							<li><div class="color-box" style="background: #736cc7;"></div> Purple</li>
-							<li><div class="color-box" style="background: #F64A91;"></div> Pink</li>
-							<li><div class="color-box" style="background: #ff5c75;"></div> Red</li>
-							<li><div class="color-box" style="background: #399AF2;"></div> Blue</li>
-							<li><div class="color-box" style="background: #FFCE67;"></div> Yellow</li>
-							<li><div class="color-box" style="background: #2fbfa0;"></div> Green</li>
-						</ul>
+						<el-checkbox :indeterminate="isIndeterminateBrand" v-model="checkAllBrands" @change="handleCheckAllBrandsChange">Marcar todos</el-checkbox>
+						<div style="margin: 15px 0;"></div>
+						<el-checkbox-group v-model="checkedBrands" @change="handleCheckedBrandsChange">
+							<el-checkbox v-for="b in brands" :label="b.id" :key="b.id">{{b.description}}</el-checkbox>
+						</el-checkbox-group>
 					</div>
 				</div>
+				<div class="widget select-color">
+					<div class="title">Proveedores</div>
+					<div class="content">
+						<el-checkbox :indeterminate="isIndeterminateProviders" v-model="checkAllProviders" @change="handleCheckAllProvidersChange">Marcar todos</el-checkbox>
+						<div style="margin: 15px 0;"></div>
+						<el-checkbox-group v-model="checkedProviders" @change="handleCheckedProvidersChange">
+							<el-checkbox v-for="b in providers" :label="b.id" :key="b.id">{{b.razonSocial}}</el-checkbox>
+						</el-checkbox-group>
+					</div>
+				</div>		
 				<div class="widget close-filter-box">
 					<button @click="sidebarOpen = false">
 						close filter
@@ -91,114 +107,47 @@
 				</div>
 			</div>
 		</div>
+		<product-dialog 
+			:dialogvisible.sync="dialogvisible" 
+			:modelo="modelo" 
+			:categories="categories" 
+			:brands="brands" 
+			:providers="providers" 
+			:locations="locations" 
+			:pricelists="pricelists" >
+			<!-- v-on:addContact="save('dialog-provider')"
+			v-on:deleteContact="openDelete()"> -->
+		</product-dialog>		
 	</div>
 </template>
 
 <script>
+import ProductDialog from '@/views/pages/ProductNew'
+import axios from 'axios'
 export default {
-	name: 'EcommerceProducts',
+	name: 'Products',
 	data () {
 		return {
 			gridData: [],
 			sidebarOpen: false,
-			range: [25, 75],
-			treeData: [
-				{
-					id: 1,
-					label: 'Chairs',
-					children: [
-						{
-							label: 'Dining chairs'
-						},
-						{
-							label: 'Foldable chairs'
-						},
-						{
-							label: 'Café chairs'
-						}
-					]
-				}, 
-				{
-					label: 'Café & bar chairs',
-					children: [
-						{
-							label: 'Bar Stools',
-						}, 
-						{
-							label: 'Café chairs',
-						}
-					]
-				}, 
-				{
-					label: 'Dining sets',
-					children: []
-				}, 
-				{
-					label: 'Garden chairs',
-					children: [
-						{
-							label: 'Garden chairs'
-						},
-						{
-							label: 'Garden benches'
-						},
-						{
-							label: 'Sun loungers & hammocks'
-						}
-					]
-				},
-				{
-					label: 'Stools & benches',
-					children: []
-				},
-				{
-					label: 'Step stools',
-					children: []
-				},
-				{
-					label: 'Junior chairs',
-					children: []
-				},
-				{
-					label: 'High chairs',
-					children: []
-				},
-				{
-					label: 'Armchairs',
-					children: [
-						{
-							label: 'Fabric armchairs'
-						},
-						{
-							label: 'Leather armchairs'
-						},
-						{
-							label: 'Leather & coated fabric armchairs'
-						},
-						{
-							label: 'Coated fabric armchairs'
-						},
-						{
-							label: 'Rattan armchairs'
-						}
-					]
-				},
-				{
-					label: 'Office chairs',
-					children: [
-						{
-							label: 'Swivel chairs'
-						},
-						{
-							label: "Visitor's chairs"
-						}
-					]
-				}
-			],
+			range: [1, 100000],
+			categories:null,
+			brands:null,
+			providers:null,
+			locations: null,
+			pricelists: null,
 			treeProps: {
 				children: 'children',
 				label: 'label'
-			}
+			},
+			checkAllBrands: false,
+			checkedBrands: [],
+			isIndeterminateBrand: true,
+			checkAllProviders: false,
+			checkedProviders: [],
+			isIndeterminateProviders: true,
+			dialogvisible: false,
+			modelo: null
 		}
 	},
 	computed: {},
@@ -216,19 +165,170 @@ export default {
 				})
 			})
 		},
+		openDialog(objeto) {
+		/*	this.clean();
+
+			if (objeto!=null){
+
+				this.data.id=objeto.id;		
+				this.data.razonSocial= objeto.razonSocial;
+				this.data.documento= objeto.documento;
+				this.data.documentTypeId= objeto.documentTypeId;
+				this.data.address=objeto.address;
+				this.data.cityId.push(objeto.countryId);
+				this.data.cityId.push(objeto.stateId);
+				this.data.cityId.push(objeto.cityId);
+				this.data.email=objeto.email;
+				this.data.webSite=objeto.webSite;
+				this.data.favorite=objeto.favorite;
+				this.data.observation=objeto.observation;
+				this.data.phone=objeto.phone;
+				this.data.logo= objeto.logo;
+				this.data.logoName= objeto.logoName;
+				this.editedIndex=0;
+				
+			}
+			else
+			{
+				this.editedIndex=-1;				
+			}*/
+				
+
+			this.dialogvisible = true
+		},		
+		getCategories() {
+			let me = this;
+			let url = me.URL_GET_CATEGORIES+ parseInt(me.companyId);
+			axios.get(url)
+			.then(function(response) {
+			me.categories = response.data;
+			})
+			.catch(function(error) {
+			me.showError();
+			});
+		}, 	
+		getBrands() {
+			let me = this;
+			let url = me.URL_GET_BRANDS+ parseInt(me.companyId);
+			axios.get(url)
+			.then(function(response) {
+			me.brands = response.data;
+			})
+			.catch(function(error) {
+			me.showError();
+			});
+		}, 
+		getProviders() {
+			let me = this;
+			let url = me.URL_GET_PROVIDERS+ parseInt(me.companyId);
+			axios.get(url)
+			.then(function(response) {
+			me.providers = response.data;
+			})
+			.catch(function(error) {
+			me.showError();
+			});
+		}, 	
+		getLocations() {
+			let me = this;
+			let url = me.URL_GET_LOCATIONS+ parseInt(me.companyId);
+			axios.get(url)
+			.then(function(response) {
+			me.locations = response.data;
+			})
+			.catch(function(error) {
+			me.showError();
+			});
+		}, 	
+		getPriceList() {
+			let me = this;
+			let url = me.URL_GET_PRICE_LISTS+ parseInt(me.companyId);
+			axios.get(url)
+			.then(function(response) {
+			me.pricelists = response.data;
+			})
+			.catch(function(error) {
+			me.showError();
+			});
+		}, 								
 		gotoDetail() {
 			this.$router.push({name:'ecommerce-product-detail'})
+		},
+		//CHECKBOX -INI
+      handleCheckAllBrandsChange(val) {
+		//this.checkedBrands = val ? this.brands.id : [];
+		this.checkedBrands=[];
+		if (val)
+		{
+			this.brands.forEach(element => {
+				this.checkedBrands.push(element.id);
+			});
 		}
+
+		 this.isIndeterminateBrand = false;
+      },
+      handleCheckedBrandsChange(value) {
+        let checkedCount = value.length;
+        this.checkAllBrands = checkedCount === this.brands.length;
+        this.isIndeterminateBrand = checkedCount > 0 && checkedCount < this.brands.length;
+	  }	,
+      handleCheckAllProvidersChange(val) {
+		this.checkedProviders=[];
+		if (val)
+		{
+			this.providers.forEach(element => {
+				this.checkedProviders.push(element.id);
+			});
+		}
+
+		 this.isIndeterminateProviders = false;
+      },
+      handleCheckedProvidersChange(value) {
+        let checkedCount = value.length;
+        this.checkAllProviders = checkedCount === this.brands.length;
+        this.isIndeterminateProviders = checkedCount > 0 && checkedCount < this.brands.length;
+      }		  
+	  
 	},
 	created() {
-		this.initGridData()
+				this.URL_GET= this.$route.meta.URL_GET;
+				this.URL_CREATE= this.$route.meta.URL_CREATE;
+				this.URL_UPDATE= this.$route.meta.URL_UPDATE;
+				this.URL_DELETE= this.$route.meta.URL_DELETE;		
+				this.URL_GET_CATEGORIES = this.$route.meta.URL_GET_CATEGORIES;
+				this.URL_GET_BRANDS = this.$route.meta.URL_GET_BRANDS;
+				this.URL_GET_PROVIDERS = this.$route.meta.URL_GET_PROVIDERS;
+				this.URL_GET_BRANDS = this.$route.meta.URL_GET_BRANDS;
+				this.URL_GET_LOCATIONS = this.$route.meta.URL_GET_LOCATIONS;
+				this.URL_GET_PRICE_LISTS = this.$route.meta.URL_GET_PRICE_LISTS;
+				this.companyId = parseInt( this.$store.getters.user.CompanyId);
+				this.modelo = this.$route.meta.modelo;
+				this.getCategories();
+				this.getBrands();
+				this.getProviders();
+				this.getLocations();
+				this.getPriceList();
+				this.initGridData()
 	},
-	mounted() {}
+	mounted() {},
+	components: {
+		ProductDialog
+	}	
 }
 </script>
 
 <style lang="scss" scoped>
 @import '../../assets/scss/_variables';
+
+
+.el-checkbox  {
+	margin-right: 100%!important;	
+}
+
+.btnNuevoProducto {
+	width: 100%;
+	margin-bottom: 10px;
+}
 
 .page-ecommerce-products {
 	.sidebar {

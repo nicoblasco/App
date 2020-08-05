@@ -35,7 +35,7 @@
             v-model="line.icon"
           />
         </el-col>
-        <el-col :xs="24" :sm="12" :md="4" :lg="3" :xl="3">
+        <el-col :xs="24" :sm="12" :md="4" :lg="2" :xl="2">
           <input
             placeholder="Orden"
             type="number"

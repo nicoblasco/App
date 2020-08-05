@@ -1,7 +1,7 @@
 
 
 <template>
-  <vue-scroll class="page-ecommerce-new-product">
+  <vue-scroll class="page-configuration">
     <el-steps :active="active" finish-status="success">
       <el-step title="Pantallas"></el-step>
       <el-step title="Atributos"></el-step>
@@ -950,7 +950,7 @@ export default {
 <style lang="scss">
 @import "../../../assets/scss/_variables";
 
-.page-ecommerce-new-product {
+.page-configuration {
   .page-header {
     margin-bottom: 20px;
   }
@@ -1222,7 +1222,7 @@ export default {
 }
 
 @media (max-width: 768px) {
-  .page-ecommerce-new-product {
+  .page-configuration {
     .item-box {
       .detail-box {
         padding-left: 30px;
