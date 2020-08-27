@@ -56,10 +56,10 @@
 					<el-input-number v-model="modelo.quote" :disabled="!fields[FIELD_QUOTE].enabled"  :precision="2">
 					</el-input-number>
 				</el-form-item>	
-				<el-form-item v-if="editedIndex !=-1 && fields[FIELD_ENDDATE].visible" v-bind:label="fields[FIELD_ENDDATE].name" :label-width="formLabelWidth"  prop="dateEnd" >
+				<!-- <el-form-item v-if="editedIndex !=-1 && fields[FIELD_ENDDATE].visible" v-bind:label="fields[FIELD_ENDDATE].name" :label-width="formLabelWidth"  prop="dateEnd" >
 					<el-date-picker v-model="modelo.dateEnd" type="date" :disabled="!fields[FIELD_ENDDATE].enabled" placeholder="Seleccione...">                        
                     </el-date-picker>
-				</el-form-item>         
+				</el-form-item>          -->
 				<el-form-item v-if="fields[FIELD_ENABLED].visible" v-bind:label="fields[FIELD_ENABLED].name" :label-width="formLabelWidth"  >
 					<el-switch inactive-text class="mr-20 themed" v-model="modelo.enabled"></el-switch>	
 				</el-form-item>		
@@ -128,17 +128,17 @@ export default {
 						tdClass: 'text-left',
 						filterable: true
 					},
-					{
+					/*{
 						label: 'Fecha Fin',
 						field: 'dateEnd',
 						sortable:true,
 						formatFn: this.formatFn,
-						//type: 'date',
-						//dateInputFormat: 'yyyy-MM-dd HH:mm:ss',
-						//dateOutputFormat: 'dd-MM-yyyy',
-						//tdClass: 'text-left',
-						//filterable: false
-					},					
+						type: 'date',
+						dateInputFormat: 'yyyy-MM-dd HH:mm:ss',
+						dateOutputFormat: 'dd-MM-yyyy',
+						tdClass: 'text-left',
+						filterable: false
+					},	*/				
 					{
 						label: 'Acciones',
 						field: 'actions',

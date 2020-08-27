@@ -114,7 +114,10 @@
 			:brands="brands" 
 			:providers="providers" 
 			:locations="locations" 
-			:pricelists="pricelists" >
+			:pricelists="pricelists" 
+			:lists="lists"
+			:exchanges="exchanges"
+			:allownew ="allownew">
 			<!-- v-on:addContact="save('dialog-provider')"
 			v-on:deleteContact="openDelete()"> -->
 		</product-dialog>		
@@ -135,7 +138,18 @@ export default {
 			brands:null,
 			providers:null,
 			locations: null,
+			exchanges: null,
 			pricelists: null,
+			lists: [],
+			priceDefault: {
+				Id: "5",
+				Price:0,
+				isNew: true,
+				isRemoved: false,
+				isDefault: true
+
+			},
+			allownew: false,
 			treeProps: {
 				children: 'children',
 				label: 'label'
@@ -240,6 +254,17 @@ export default {
 			me.showError();
 			});
 		}, 	
+		getExchanges() {
+			let me = this;
+			let url = me.URL_GET_EXCHANGES+ parseInt(me.companyId);
+			axios.get(url)
+			.then(function(response) {
+			me.exchanges = response.data;
+			})
+			.catch(function(error) {
+			me.showError();
+			});
+		}, 			
 		getPriceList() {
 			let me = this;
 			let url = me.URL_GET_PRICE_LISTS+ parseInt(me.companyId);
@@ -291,23 +316,23 @@ export default {
 	  
 	},
 	created() {
-				this.URL_GET= this.$route.meta.URL_GET;
-				this.URL_CREATE= this.$route.meta.URL_CREATE;
-				this.URL_UPDATE= this.$route.meta.URL_UPDATE;
-				this.URL_DELETE= this.$route.meta.URL_DELETE;		
+				this.URL_GET= this.$route.meta.URL_GET;	
 				this.URL_GET_CATEGORIES = this.$route.meta.URL_GET_CATEGORIES;
 				this.URL_GET_BRANDS = this.$route.meta.URL_GET_BRANDS;
 				this.URL_GET_PROVIDERS = this.$route.meta.URL_GET_PROVIDERS;
 				this.URL_GET_BRANDS = this.$route.meta.URL_GET_BRANDS;
 				this.URL_GET_LOCATIONS = this.$route.meta.URL_GET_LOCATIONS;
 				this.URL_GET_PRICE_LISTS = this.$route.meta.URL_GET_PRICE_LISTS;
+				this.URL_GET_EXCHANGES= this.$route.meta.URL_GET_EXCHANGES;
 				this.companyId = parseInt( this.$store.getters.user.CompanyId);
 				this.modelo = this.$route.meta.modelo;
+				this.lists.push(this.priceDefault);
 				this.getCategories();
 				this.getBrands();
 				this.getProviders();
 				this.getLocations();
 				this.getPriceList();
+				this.getExchanges();
 				this.initGridData()
 	},
 	mounted() {},

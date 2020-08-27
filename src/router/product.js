@@ -19,13 +19,14 @@ export default {
 		URL_GET_PROVIDERS: 'api/Providers/',
 		URL_GET_LOCATIONS: 'api/Locations/',
 		URL_GET_PRICE_LISTS: 'api/PriceLists/',
+		URL_GET_EXCHANGES: 'api/ExchangeCurrencies/',
 		modelo: {
 			id: null,
 			codigo: null,
 			name: null,
 			nameShort: null,
 			description: null,
-			categororyId: null,
+			categoryId: null,
 			subCategoryId: null,
 			priceListIds: null,
 			brandId: null,
@@ -35,15 +36,18 @@ export default {
 			cost: null,
 			gain: null,
 			price: null,
-			exchangeCurrencyId: null,
+			exchangeCurrencyId: 6,
 			discount: null,
 			inStock: null,
 			awaiting: null,
 			outOfStock: null,
 			logo: null,
 			logoName: null,
-			checkStock: false,
-			enabled: null
+			checkStock: true,
+			active: true,
+			status: "En Stock",
+			validacionOK: false,
+
 		}
 			
     }       

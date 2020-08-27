@@ -1,6 +1,7 @@
 <template>
 
-	<el-dialog :show-close="true" :custom-class="'user-dialog'" :visible="dialogvisible" @close="$emit('update:dialogvisible', false)">
+	<el-dialog :show-close="true" :custom-class="'user-dialog'" :visible="dialogvisible" @close="close">
+		<el-form :model="modelo" ref="modelo" :rules="rules"  style="form-item-content">
 		<vue-scroll class="page-ecommerce-new-product">
 		<el-row>
 			<el-col>
@@ -18,8 +19,8 @@
 												:show-file-list="false"		
 												:on-change="uploadFile"
 												:auto-upload="false">
-												<img src="modelo.logo"  alt="user avatar" v-if="modelo.logo!=null">
-												<img src="@/assets/images/product.png"  alt="user avatar" v-else>
+												<img :src="modelo.logo"  alt="product logo" v-if="modelo.logo!=null">
+												<img src="@/assets/images/product.png"  alt="product logo" v-else>
 												<!-- <i v-else class="el-icon-plus avatar-uploader-icon"></i> -->
 											</el-upload> 
 										</div>
@@ -31,12 +32,14 @@
 							<div class="detail-box">
 								<el-row>
 									<el-col>
-										<input class="title" v-model="modelo.name" placeholder="Nombre del Producto">
+										<el-form-item  prop="name">
+											<input class="title" v-model="modelo.name" placeholder="Nombre del Producto">
+										</el-form-item>
 									</el-col>
 								</el-row>
 								<el-row :gutter="20">
 									<el-col :xs="24" :sm="12" :md="12" :lg="6" :xl="6">
-										<div class="select-box mb-10">
+										<div class="select-box mb-10">											
 											<el-input placeholder="Código" v-model="modelo.codigo" size="small"></el-input>
 										</div>
 									</el-col>
@@ -58,19 +61,25 @@
 									<el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
 										<div class="number-input">
 											<label>Costo ($)</label>
-											<el-input-number size="small" v-model="modelo.cost" controls-position="right" :min="0" class="themed mr-10 mb-10"></el-input-number>
+											<el-form-item  prop="cost"> 
+												<el-input-number size="small" v-model="modelo.cost" controls-position="right" :min="0"  @change="priceRecall" class="themed mr-10 mb-10"></el-input-number>
+											 </el-form-item> 
 										</div>
 									</el-col>
 									<el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
 										<div class="number-input">
 											<label>Ganancia (%)</label>
-											<el-input-number size="small" v-model="modelo.gain" controls-position="right" :min="0" class="themed mr-10 mb-10"></el-input-number>
+											<el-form-item  prop="gain"> 
+												<el-input-number size="small" v-model="modelo.gain" controls-position="right" :min="0" @change="priceRecall" class="themed mr-10 mb-10"></el-input-number>
+											</el-form-item>
 										</div>
 									</el-col>
 									<el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
 										<div class="number-input">
 											<label>Stock Minimo</label>
-											<el-input-number size="small" v-model="modelo.stockMin" controls-position="right" :min="0" class="themed mr-10 mb-10"></el-input-number>
+											<el-form-item  prop="stockMin"> 
+												<el-input-number size="small" v-model="modelo.stockMin" controls-position="right" :min="0" class="themed mr-10 mb-10" :disabled="!modelo.checkStock" ></el-input-number>
+											</el-form-item>
 										</div>
 									</el-col>
 								</el-row>								
@@ -78,19 +87,25 @@
 									<el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
 										<div class="number-input">
 											<label>Precio ($)</label>
-											<el-input-number size="small" v-model="modelo.price" controls-position="right" :min="0" class="themed mr-10 mb-10"></el-input-number>
+											<el-form-item  prop="price"> 
+												<el-input-number size="small" v-model="modelo.price" @change="priceCalc" :controls="false" :min="0" class="themed mr-10 mb-10"></el-input-number>
+											</el-form-item>
 										</div>
 									</el-col>
 									<el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
 										<div class="number-input">
 											<label>Descuento (%)</label>
-											<el-input-number size="small" v-model="modelo.discount" controls-position="right" :min="0" class="themed mr-10 mb-10"></el-input-number>
+											<el-form-item  prop="discount"> 
+												<el-input-number size="small" v-model="modelo.discount" controls-position="right" :min="0" class="themed mr-10 mb-10"></el-input-number>
+											</el-form-item>
 										</div>
 									</el-col>
 									<el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
 										<div class="number-input">
 											<label>Stock</label>
-											<el-input-number size="small" v-model="modelo.stock" controls-position="right" :min="0" class="themed mr-10 mb-10"></el-input-number>
+											<el-form-item  prop="stock"> 
+												<el-input-number size="small" v-model="modelo.stock" controls-position="right" :min="0" class="themed mr-10 mb-10" :disabled="!modelo.checkStock"></el-input-number>
+											</el-form-item>
 										</div>
 									</el-col>
 								</el-row>
@@ -117,7 +132,7 @@
 										<el-cascader
 											v-model="modelo.categoryId"
 											class="cascade"
-											placeholder="Catagorias..." 
+											placeholder="Categorias..." 
 											size="small"           
 											:options="categories"
 											filterable clearable>
@@ -133,8 +148,12 @@
 												clearable
 												class="themed" 
 												:popper-class="'themed color-accent-'+colorAccent"
+												filterable
+												:allow-create="allownew"
+												:no-match-text="datoNoEncontrado"
+												:no-data-text= "noHayDatos"		
 											>
-												<el-option v-for="(i, index) in brands" :key="index" :label="i.description" :value="kebabCase(i.description)"></el-option>
+												<el-option v-for="(i, index) in brands" :key="index" :label="i.description" :value="i.id"></el-option>
 											</el-select>
 										</div>
 									</el-col>									
@@ -142,7 +161,7 @@
 
 								<el-row :gutter="20">
 
-									<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+									<el-col :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
 										<div class="select-box mb-10">
 											<el-select 
 												v-model="modelo.locationId" 
@@ -151,11 +170,31 @@
 												clearable
 												class="themed" 
 												:popper-class="'themed color-accent-'+colorAccent"
+												filterable
+												:allow-create="allownew"
+												:no-match-text="datoNoEncontrado"
+												:no-data-text= "noHayDatos"																							
 											>
-												<el-option v-for="(i, index) in locations" :key="index" :label="i.description" :value="kebabCase(i.description)"></el-option>
+												<el-option v-for="(i, index) in locations" :key="index" :label="i.description" :value="i.id"></el-option>
 											</el-select>
 										</div>
 									</el-col>
+									<el-col :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
+										<div class="select-box mb-10">
+											<el-select 
+												v-model="modelo.exchangeCurrencyId" 
+												size="small"
+												placeholder="Moneda" 
+												clearable
+												class="themed" 
+												:popper-class="'themed color-accent-'+colorAccent"
+												no-data-text="No hay datos"												
+											>
+												<el-option v-for="(i, index) in exchanges" :key="index" :label="i.description" :value="i.id"></el-option>
+											</el-select>
+										</div>
+									</el-col>
+
 									<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
 										<div class="select-box mb-10">
 											<el-select
@@ -163,25 +202,29 @@
 												size="small"
 												multiple
 												filterable
-												allow-create
+												:allow-create="allownew"
+												:no-match-text="datoNoEncontrado"
+												:no-data-text= "noHayDatos"											
 												default-first-option
 												placeholder="Proveedor"
-												class="themed" 
+												class="themed" 												
 												:popper-class="'themed color-accent-'+colorAccent">
-												<el-option v-for="(i, index) in providers" :key="index" :label="i.razonSocial" :value="kebabCase(i.razonSocial)"></el-option>
+												<el-option v-for="(i, index) in providers" :key="index" :label="i.razonSocial" :value="i.id"></el-option>
 											</el-select>
 										</div>
 									</el-col>									
-								</el-row>								
-								<price-list 
-									:modelo="modelo" 
-									:pricelists="pricelists" >
-									<!-- v-on:addContact="save('dialog-provider')"
-									v-on:deleteContact="openDelete()"> -->
-								</price-list>
+								</el-row>
+								<div v-for="(item,index) in preciosDeLista" :key="index">								
+									<price-list 
+										:price="item" 
+										:pricelists="pricelists" 
+										v-on:addprice="handleAddPrice()"
+										v-on:deleteprice="handleDeletePrice(item)"> 
+									</price-list> 
+								</div>
 								<el-row >
 									<el-col class="text-right">
-										<el-radio-group v-model="status" class="themed">
+										<el-radio-group v-model="modelo.status" class="themed">
 											<el-radio-button label="En Stock"></el-radio-button>
 											<el-radio-button label="En Espera"></el-radio-button>
 											<el-radio-button label="Sin Stock"></el-radio-button>
@@ -192,8 +235,8 @@
 								<el-row>
 									<el-col>
 										<div class="actions-box text-right">
-											<el-switch v-model="active" active-text="Activo" inactive-text="" class="mr-20 themed"></el-switch>
-											<el-button class="themed mb-10 mr-10" type="primary" plain><i class="mdi mdi-content-save"></i> Guardar</el-button>
+											<el-switch v-model="modelo.active" active-text="Activo" inactive-text="" class="mr-20 themed"></el-switch>
+											<el-button class="themed mb-10 mr-10" type="primary" plain @click="save"><i class="mdi mdi-content-save" ></i> Guardar</el-button>
 											<el-button class="themed mb-10" type="primary" plain><i class="mdi mdi-refresh"></i> Limpiar</el-button>
 										</div>
 									</el-col>
@@ -207,22 +250,31 @@
 		</el-row>
 	
 		</vue-scroll>
+		</el-form>
 	</el-dialog>
 </template>
 
 <script>
 import _ from 'lodash'
 import PriceList from '@/components/PriceList'
+import axios from "axios";
+import { Loading } from 'element-ui';
 
 export default {
 	name: 'EcommerceNewProduct',
-	props: ['dialogvisible','categories','brands','providers','locations','pricelists','modelo'],
+	props: ['dialogvisible','categories','brands','providers','locations','pricelists','modelo', 'lists','exchanges','allownew'],
 	data () {
 		return {
 			imagePlaceholder: '@/assets/images/product.png',
 			discount: 15,
 			price: 155,
 			stock: 100,
+			datoNoEncontrado: "Dato no encontrado",
+			noHayDatos: "No hay datos",
+			default: {
+				id : null,
+				price :0
+			},
 			tags_options: [
 				{
 					value: 'Chairs',
@@ -244,18 +296,75 @@ export default {
 			cat_list: ['Dining chairs', 'Foldable chairs', 'Bar Stools', 'Garden chairs', 'Step stools', 'Junior chairs', 'High chairs', 'Fabric armchairs', 'Leather armchairs', 'Rattan armchairs', 'Swivel chairs', 'Office chairs'],
 			status: 'En Espera',
 			active: true,
+			rules: {
+						name: [
+						{ required: true, message: 'Por favor ingrese el Nombre del Producto', trigger: 'blur' },
+						{ min: 1, max: 200, message: 'Debe tener entre 1 y 200 caracteres', trigger: 'blur' }
+						],
+						cost: [
+							{ required: true, message: 'Costo requerido'},
+							{ type: 'number', message: 'Debe ser numerico'}
+						]	
+						,
+						gain: [
+							{ required: true, message: 'Ganancia requerido'},
+							{ type: 'number', message: 'Debe ser numerico'}
+						]
+						,
+						stockMin: [
+							{ required: true, message: 'Stock min requerido'},
+							{ type: 'number', message: 'Debe ser numerico'}
+						]
+						,
+						price: [
+							{ required: true, message: 'Precio requerido'},
+							{ type: 'number', message: 'Debe ser numerico'}
+						]
+						,
+						discount: [
+							{ required: true, message: 'Descuento requerido'},
+							{ type: 'number', message: 'Debe ser numerico'}
+						]
+						,
+						stock: [
+							{ required: true, message: 'Stock requerido'},
+							{ type: 'number', message: 'Debe ser numerico'}
+						]																								
+					}				
 		}
 	},
 	computed: {
 		finalPrice() {
-			return (this.price - this.discountPrice).toFixed(2)
+			return (this.modelo.price - this.modelo.discount).toFixed(2)
 		},
 		discountPrice() {
-			return (this.price / 100 * this.discount).toFixed(2)
+			return (this.modelo.price / 100 * this.modelo.discount).toFixed(2)
 		},
 		colorAccent() {
 			return this.$store.getters.colorAccent
-		}
+		},
+		preciosDeLista: function() {
+			return this.lists.filter(
+				x =>  x.isRemoved == false
+			);
+		},
+	/*	priceNeto: {
+			get() {
+				return (this.modelo.cost + (this.modelo.cost * this.modelo.gain / 100 )).toFixed(2)
+			},
+			set(newValue){
+				this.modelo.price = newValue;
+				this.lists[0].Price=newValue;
+				this.lists[0].PriceList=5;
+				
+			}
+			
+		},*/		
+	},
+	created() {
+		this.URL_CREATE= this.$route.meta.URL_CREATE;
+		this.URL_UPDATE= this.$route.meta.URL_UPDATE;
+		this.URL_DELETE= this.$route.meta.URL_DELETE;	
 	},
 	methods: {
 		kebabCase: _.kebabCase,
@@ -265,15 +374,171 @@ export default {
 		},		
    	    encodeImage (input) {
 			if (input) {
-				this.data.logoName= input.name
+				this.modelo.logoName= input.name
 				const reader = new FileReader()
 				reader.onload = (e) => {
-				this.data.logo = e.target.result;								
+				this.modelo.logo = e.target.result;								
 				}
 				reader.readAsDataURL(input);
 			}
+		},
+    	handleAddPrice() {
+			let objeto = {
+				Id: null,
+				PriceList: null,
+				Price: null,
+				isNew: true,
+				isRemoved: false,
+				isDefault: false		
+			};
+			this.lists.push(objeto);
 		},		
+    	handleDeletePrice(obj) {
+			obj.isRemoved = true;
+		},	
+		priceCalc() {
+				this.lists[0].Price=this.modelo.price;
+				this.lists[0].PriceList=5;							
+		},		
+		priceRecall(){
+			this.modelo.price =this.modelo.cost + (this.modelo.cost * this.modelo.gain / 100 );//.toFixed(2);
+			this.priceCalc();
+		},
+		save() {
+			
+			let me = this;
+      		let objeto = null; 
+			this.validate();  
+			if( this.modelo.validacionOK)
+			{
+				let loadingInstance  = Loading.service({ fullscreen: true });
+				let categoryId=null;
+				let subCategoryId=null;
+				let inStock = false;
+				let awaiting = false;
+				let outOfStock= false;				
+				if (me.modelo.categoryId!= null && me.modelo.categoryId.length>0){
+					categoryId=me.modelo.categoryId[0];
+					subCategoryId=me.modelo.categoryId[1];
+				}
+
+				 switch (this.modelo.status) {
+					case "En Stock":
+						inStock= true;
+						break; 
+					case "En Espera": 
+						awaiting= true;
+						break; 
+					case "Sin Stock": 
+						outOfStock= true;
+						break; 
+				 }
+
+				if (me.modelo.id==null)		
+				{
+					
+					me.objeto= {
+						   Name: me.modelo.name,
+						   Awaiting: awaiting,
+						   BrandId: me.modelo.brandId,
+						   CategoryId: categoryId,
+						   SubCategoryId: subCategoryId,
+						   Codigo: me.modelo.codigo,
+						   CompanyId: parseInt( this.$store.getters.user.CompanyId),
+						   Cost: me.modelo.cost,
+						   Description: me.modelo.description,
+						   Discount: me.modelo.discount,
+						   ExchangeCurrencyId: me.modelo.exchangeCurrencyId,
+						   Gain: me.modelo.gain,
+						   InStock: inStock,
+						   LocationId: me.modelo.locationId,
+						   NameShort: me.modelo.nameShort,
+						   OutOfStock: outOfStock,
+						   Price: me.modelo.price,
+						   Stock: me.modelo.stock,
+						   StockMin: me.modelo.stockMin,						   
+						   CheckStock: me.modelo.checkStock,
+						   Providers: [],
+						   ProductPriceLists: []
+
+						}
+					    me.modelo.providerId.forEach(prov=> {
+								me.objeto.Providers.push(prov);
+						});
+						 
+						me.lists.filter(
+        					x => x.isRemoved == false && x.PriceList !=null
+      					).forEach(price=> {
+								let productPriceList = {
+									PriceList: price.PriceList,
+									Price: price.Price
+								};
+								me.objeto.ProductPriceLists.push(productPriceList);
+						});
+
+				}
+
+				axios.post(this.URL_CREATE, me.objeto)
+				.then(function(response) {
+					me.clear();
+
+					loadingInstance.close();
+					me.showOk();
+				})
+				.catch(function(error) {
+					loadingInstance.close();
+					me.showError();
+				});
+				loadingInstance.close();
+			}
+
+		},
+		validate(){
+			this.$refs['modelo'].validate((valid) => {
+				this.modelo.validacionOK= valid;
+			});
+		},
+		close() {
+			this.clear();
+			this.$emit('update:dialogvisible', false);
+		},
+		clear() {
+
+			this.modelo.id= null;
+			this.modelo.codigo= null;
+			this.modelo.name= null;
+			this.modelo.nameShort= null;
+			this.modelo.description= null;
+			this.modelo.categoryId= null;
+			this.modelo.subCategoryId= null;
+			this.modelo.priceListIds= null;
+			this.modelo.brandId= null;
+			this.modelo.locationId= null;
+			this.modelo.stock= 0;
+			this.modelo.stockMin= 0;
+			this.modelo.price= 0;
+			this.modelo.exchangeCurrencyId= 6;
+			this.modelo.discount= 0;
+			this.modelo.inStock= null;
+			this.modelo.awaiting= null;
+			this.modelo.outOfStock= null;
+			this.modelo.logo= null;
+			this.modelo.logoName= null;
+			this.modelo.checkStock= true;
+			this.modelo.active= true;
+			this.modelo.status= "En Stock";
+			this.modelo.validacionOK= false;
+			for (let index = 0; index < this.lists.length; index++) {
+				if (index>0)
+					this.lists.splice(index);				
+			}	
+			//this.priceNeto=0;
+			this.modelo.cost= 0;
+			this.modelo.gain= 0;
+			this.lists[0].Price=0;
+		}					
 	},
+
 	components: {
 		PriceList
 	}		
@@ -287,6 +552,20 @@ export default {
 	width: 850px;
 	.page-header {
 		margin-bottom: 20px;
+	}
+
+	.el-form-item__error {
+		position: relative!important;	
+		margin-top: -10px;	
+	}
+
+	.el-form-item {
+		margin-bottom: 0px;
+		margin-left: 0px!important;
+	}
+
+	.el-form-item__content  {
+		line-height: 0px!important;	
 	}
 
 	.color-list {
