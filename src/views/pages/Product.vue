@@ -14,9 +14,9 @@
 				<div class="widget">
 					<div class="title">Busqueda rápida</div>
 					<div class="content">
-						<el-input size="mini" placeholder="CÓDIGO"  clearable> </el-input>
+						<el-input size="mini" placeholder="CÓDIGO" v-model="searchCode"  clearable> </el-input>
 						<div style="margin: 10px 0;"></div>
-						<el-input size="mini" placeholder="DESCRIPCIÓN"  clearable> </el-input>
+						<el-input size="mini" placeholder="DESCRIPCIÓN" v-model="searchDescription"  clearable> </el-input>
 					</div>
 				</div>				
 				<div class="widget">
@@ -75,37 +75,81 @@
 					<span v-if="sidebarOpen">close filter</span>
 				</button>
 			</div>
+			  <el-table
+				:data="productFilter"
+				stripe
+				height="250"
+				style="width: 70%">
+				<el-table-column
+				fixed
+				sortable
+				prop="codigo"
+				label="Código"
+				width="100">
+				</el-table-column>
+				<el-table-column
+				fixed
+				sortable
+				prop="name"
+				label="Producto"
+				width="150">
+				</el-table-column>
+				<el-table-column
+				sortable
+				prop="status"
+				label="Estado"
+				width="120"
+				:filters="[{ text: 'En Stock', value: 'En Stock' }, { text: 'Sin Stock', value: 'Sin Stock' }, { text: 'En Espera', value: 'En Espera' }, { text: 'Ultimos', value: 'Ultimos' }]"
+				:filter-method="filterTag"
+				filter-placement="bottom-end">				
+				<template slot-scope="scope">
+					<el-tag
+					:type="scope.row.status === 'En Stock' ? 'success' : (scope.row.status === 'Sin Stock'? 'danger': 'warning' ) "
+					disable-transitions>{{scope.row.status}}</el-tag>
+				</template>				
+				</el-table-column>
+				<el-table-column
+				sortable
+				prop="stock"
+				label="Stock"
+				width="100">
+				</el-table-column>
+				<el-table-column
+				sortable
+				prop="price"
+				label="Precio"
+				width="100">
+				</el-table-column>
+				<el-table-column
+				sortable
+				prop="brand"
+				label="Marca"
+				width="120">
+				</el-table-column>
+				<el-table-column
+				sortable
+				prop="category"
+				label="Rubro"
+				width="120">
+				</el-table-column>
+				<el-table-column
+				sortable
+				prop="subCategory"
+				label="SubRubro"
+				width="120">
+				</el-table-column>	
+				<el-table-column
+					fixed="right"
+					label="Acciones"
+					width="120">							
+				<template >
+					<el-button type="success" icon="el-icon-check" size="mini" circle></el-button>
+					<el-button type="danger" icon="el-icon-delete" size="mini" circle></el-button>
+				</template>
+				</el-table-column>				
+			  </el-table>
 
-			<div class="list scrollable only-y box grow">
-				<div v-for="i in gridData" :key="i.id" class="item" @click="gotoDetail">
-					<div class="wrapper card-shadow--medium">
-						<div class="image p-20">
-							<div class="bg" :style="'background-image: url('+i.photo+')'"></div>
-						</div>
-						<div class="detail p-20">
-							<div class="rate">
-								<el-rate v-model="i.rate" disabled></el-rate>
-							</div>
-							<div class="name">
-								{{i.product}}
-							</div>
-							<div class="desc">
-								Lorem ipsum sit dolor amet
-							</div>
-							<div class="price">
-								$ {{i.price}}
-							</div>
-							<div class="buttons flex justify-space-between">
-								<div>
-									<button><i class="mdi mdi-heart-outline"></i></button>
-									<button class="ml-5"><i class="mdi mdi-magnify"></i></button>
-								</div>
-								<button>add to cart <i class="mdi mdi-cart-outline ml-5"></i></button>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
+
 		</div>
 		<product-dialog 
 			:dialogvisible.sync="dialogvisible" 
@@ -126,12 +170,19 @@
 
 <script>
 import ProductDialog from '@/views/pages/ProductNew'
+import 'tui-grid/dist/tui-grid.min.css'
+import tuiGrid from 'tui-grid'
+import Chance from 'chance'
 import axios from 'axios'
+const chance = new Chance()
 export default {
 	name: 'Products',
 	data () {
-		return {
+		return {			
+			grid: null,
 			gridData: [],
+			resizing: false,
+			height: 300,
 			sidebarOpen: false,
 			range: [1, 100000],
 			categories:null,
@@ -140,6 +191,9 @@ export default {
 			locations: null,
 			exchanges: null,
 			pricelists: null,
+			searchDescription: null,
+			searchCode: null,
+			//products: null,
 			lists: [],
 			priceDefault: {
 				Id: "5",
@@ -164,52 +218,33 @@ export default {
 			modelo: null
 		}
 	},
-	computed: {},
-	methods: {
-		initGridData() {
-			_.times(50, (number) => {
-				let price = chance.floating({ min: 1, max: 100, fixed: 2 })
-
-				this.gridData.push({
-					photo: '/static/images/shop/'+chance.integer({ min: 0, max: 19 })+'.jpg',
-					product: chance.sentence({ words: 3 }),
-					price: _.replace(price.toFixed(2).toString(), '.', ','),
-					rate: chance.integer({ min: 3, max: 5 }),
-					id: number,
-				})
-			})
+	computed: {
+		productFilter: function() {
+		//return this.gridData;}
+		return this.gridData.filter(
+			x => { return x.codigo.includes(this.searchCode) })			
 		},
+	},
+	methods: {
+
 		openDialog(objeto) {
-		/*	this.clean();
-
-			if (objeto!=null){
-
-				this.data.id=objeto.id;		
-				this.data.razonSocial= objeto.razonSocial;
-				this.data.documento= objeto.documento;
-				this.data.documentTypeId= objeto.documentTypeId;
-				this.data.address=objeto.address;
-				this.data.cityId.push(objeto.countryId);
-				this.data.cityId.push(objeto.stateId);
-				this.data.cityId.push(objeto.cityId);
-				this.data.email=objeto.email;
-				this.data.webSite=objeto.webSite;
-				this.data.favorite=objeto.favorite;
-				this.data.observation=objeto.observation;
-				this.data.phone=objeto.phone;
-				this.data.logo= objeto.logo;
-				this.data.logoName= objeto.logoName;
-				this.editedIndex=0;
-				
-			}
-			else
-			{
-				this.editedIndex=-1;				
-			}*/
-				
 
 			this.dialogvisible = true
 		},		
+		filterTag(value, row) {
+			return row.tag === value;
+		},		
+		getProducts() {
+			let me = this;
+			let url = me.URL_GET+ parseInt(me.companyId);
+			axios.get(url)
+			.then(function(response) {				
+			me.gridData = response.data;
+			})
+			.catch(function(error) {
+			me.showError();
+			});
+		}, 	
 		getCategories() {
 			let me = this;
 			let url = me.URL_GET_CATEGORIES+ parseInt(me.companyId);
@@ -333,16 +368,17 @@ export default {
 				this.getLocations();
 				this.getPriceList();
 				this.getExchanges();
-				this.initGridData()
+				this.getProducts();			
 	},
-	mounted() {},
+	mounted() {
+	},
 	components: {
 		ProductDialog
 	}	
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @import '../../assets/scss/_variables';
 
 
@@ -355,7 +391,51 @@ export default {
 	margin-bottom: 10px;
 }
 
+
 .page-ecommerce-products {
+	#grid {
+		.tui-grid-cell[data-column-name="logo"] {
+			.tui-grid-cell-content {
+				padding: 0px!important; 
+			}
+		}
+
+		.tui-grid-border-line-top {
+			background-color: transparent;
+		}
+		.tui-grid-cell-head {
+			border-top-color: transparent;
+		}
+	
+/*		.tui-grid-cell-head[data-column-name="mergeColumn1"] ,
+		.tui-grid-cell-head[data-column-name="mergeColumn2"] ,
+		.tui-grid-cell-head[data-column-name="mergeColumn3"] ,
+		.tui-grid-cell-head[data-column-name="mergeColumn4"] ,
+		.tui-grid-cell-head[data-column-name="mergeColumn5"] ,
+		.tui-grid-cell-head[data-column-name="mergeColumn6"] {
+			background: #f4f4f4;
+			color: #8e8e8e;
+		}*/
+
+		.tui-grid-cell-content {
+			.en-espera {
+				color: #9e9e9e;
+				font-weight: bold;
+			}
+			.ultimos {
+				color: #9e9e9e;
+				font-weight: bold;
+			}			
+			.sin-stock {
+				color: #ff005c;
+				font-weight: bold;
+			}
+			.en-stock {
+				color: #1ac367;
+				font-weight: bold;
+			}
+		}
+	}
 	.sidebar {
 		width: 300px;
 		margin-right: 20px;

@@ -9,7 +9,7 @@ export default {
 	meta: {
 		auth: true,
 		layout: layouts.navLeft,		
-		searchable: true,
+		searchable: true,		
 		URL_GET: 'api/Products/',
 		URL_CREATE: 'api/Products/Create',
 		URL_UPDATE: 'api/Products/Update',
