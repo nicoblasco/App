@@ -2,6 +2,7 @@ import Product from '../views/pages/Product.vue'
 
 import layouts from '../layout'
 
+//Hay q parametrizar: maximo precios, moneda default
 export default {
 	path: '/product',
 	name: 'product',
@@ -11,6 +12,7 @@ export default {
 		layout: layouts.navLeft,		
 		searchable: true,		
 		URL_GET: 'api/Products/',
+		URL_GET_PRODUCT: 'api/Products/GetProduct/',
 		URL_CREATE: 'api/Products/Create',
 		URL_UPDATE: 'api/Products/Update',
 		URL_DELETE: 'api/Products/Delete',	
@@ -26,7 +28,7 @@ export default {
 			name: null,
 			nameShort: null,
 			description: null,
-			categoryId: null,
+			categoryId: [],
 			subCategoryId: null,
 			priceListIds: null,
 			brandId: null,
@@ -46,7 +48,7 @@ export default {
 			checkStock: true,
 			active: true,
 			status: "En Stock",
-			validacionOK: false,
+			validacionOK: false
 
 		}
 			

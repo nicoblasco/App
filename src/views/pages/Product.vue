@@ -22,7 +22,7 @@
 				<div class="widget">
 					<div class="title">Categorias</div>
 					<div class="content">
-						<el-tree :data="categories" :props="treeProps" node-key="id" :default-expanded-keys="[1]"></el-tree>
+						<el-tree :data="categories" :props="treeProps"  node-key="id" show-checkbox @check="handleCheckChange"></el-tree>
 					</div>
 				</div>
 				<div class="widget">
@@ -31,12 +31,12 @@
 						<el-slider
 							v-model="range"
 							range
-							:max="100"
+							:max="10000"
 							class="themed"
 						></el-slider>
 						<div class="flex justify-space-between o-060">
 							<span>$ {{range[0]}}</span>
-							<span>$ {{range[1]}}</span>
+							<span>$ {{range[1]}}</span>							
 						</div>
 					</div>
 				</div>
@@ -50,7 +50,7 @@
 						</el-checkbox-group>
 					</div>
 				</div>
-				<div class="widget select-color">
+				<!-- <div class="widget select-color">
 					<div class="title">Proveedores</div>
 					<div class="content">
 						<el-checkbox :indeterminate="isIndeterminateProviders" v-model="checkAllProviders" @change="handleCheckAllProvidersChange">Marcar todos</el-checkbox>
@@ -59,7 +59,7 @@
 							<el-checkbox v-for="b in providers" :label="b.id" :key="b.id">{{b.razonSocial}}</el-checkbox>
 						</el-checkbox-group>
 					</div>
-				</div>		
+				</div>		 -->
 				<div class="widget close-filter-box">
 					<button @click="sidebarOpen = false">
 						close filter
@@ -142,9 +142,9 @@
 					fixed="right"
 					label="Acciones"
 					width="120">							
-				<template >
-					<el-button type="success" icon="el-icon-check" size="mini" circle></el-button>
-					<el-button type="danger" icon="el-icon-delete" size="mini" circle></el-button>
+				<template slot-scope="scope">
+					<el-button type="success"  icon="el-icon-edit" size="mini" circle @click="handleEdit(scope.$index, scope.row)"></el-button>
+					<el-button type="danger" icon="el-icon-delete" size="mini" circle @click="handleDelete(scope.$index, scope.row)"></el-button>
 				</template>
 				</el-table-column>				
 			  </el-table>
@@ -161,7 +161,8 @@
 			:pricelists="pricelists" 
 			:lists="lists"
 			:exchanges="exchanges"
-			:allownew ="allownew">
+			:allownew ="allownew"
+			v-on:refreshgrid="getProducts()">
 			<!-- v-on:addContact="save('dialog-provider')"
 			v-on:deleteContact="openDelete()"> -->
 		</product-dialog>		
@@ -184,7 +185,7 @@ export default {
 			resizing: false,
 			height: 300,
 			sidebarOpen: false,
-			range: [1, 100000],
+			range: [0, 10000],
 			categories:null,
 			brands:null,
 			providers:null,
@@ -193,6 +194,8 @@ export default {
 			pricelists: null,
 			searchDescription: null,
 			searchCode: null,
+			searchCategory: [],
+			searchSubCaterory: [],			
 			//products: null,
 			lists: [],
 			priceDefault: {
@@ -205,24 +208,44 @@ export default {
 			},
 			allownew: false,
 			treeProps: {
+				
 				children: 'children',
-				label: 'label'
+				label: 'label',
+				id: 'id'
 			},
 			checkAllBrands: false,
 			checkedBrands: [],
 			isIndeterminateBrand: true,
-			checkAllProviders: false,
-			checkedProviders: [],
-			isIndeterminateProviders: true,
+		//	checkAllProviders: false,
+		//	checkedProviders: [],
+		//	isIndeterminateProviders: true,
 			dialogvisible: false,
 			modelo: null
 		}
 	},
 	computed: {
 		productFilter: function() {
-		//return this.gridData;}
-		return this.gridData.filter(
-			x => { return x.codigo.includes(this.searchCode) })			
+		let codigo = null;
+		let description = null;
+		if (this.searchCode!=null)
+		{
+			codigo=searchCode.toUpperCase();
+		}
+		if (this.searchDescription!=null)
+		{
+			description=this.searchDescription.toUpperCase();
+		}		
+		return this.gridData.filter(			
+			x => { 
+				return (x.codigo.toUpperCase().includes(codigo) || codigo==null) 
+				&& (x.name.toUpperCase().includes(description) || description==null)
+				&& (this.searchCategory.length==0 || this.searchCategory.includes(x.categoryId) )
+				&& (this.searchSubCaterory.length==0 || this.searchSubCaterory.includes(x.subCategoryId) )
+				&& (x.price >= this.range[0] && x.price <= this.range[1])
+				&& (this.checkedBrands.length==0 || this.checkedBrands.includes(x.brandId) )
+			//	&& (this.checkedProviders.length==0 || this.checkedBrands.includes(x.providers) )
+
+			})			
 		},
 	},
 	methods: {
@@ -233,7 +256,58 @@ export default {
 		},		
 		filterTag(value, row) {
 			return row.tag === value;
-		},		
+		},	
+		getProduct(id) {
+			let me = this;
+			let url = me.URL_GET_PRODUCT+ parseInt(id);
+			axios.get(url)
+			.then(function(response) {					
+			me.modelo.active = true;
+			me.modelo.awaiting = response.data.awaiting;
+			me.modelo.brandId = response.data.brandId;
+			if (response.data.categoryId!=null)
+				me.modelo.categoryId.push(response.data.categoryId);
+			if (response.data.subCategoryId!=null)
+				me.modelo.categoryId.push(response.data.subCategoryId);			
+			me.modelo.checkStock = response.data.checkStock;
+			me.modelo.codigo = response.data.codigo;
+			me.modelo.cost = response.data.cost;
+			me.modelo.description = response.data.description;
+			me.modelo.discount = response.data.discount;
+			me.modelo.exchangeCurrencyId= response.data.exchangeCurrencyId;
+			me.modelo.gain= response.data.gain;
+			me.modelo.id = response.data.id;
+			me.modelo.inStock = response.data.inStock;
+			me.modelo.locationId= response.data.locationId;
+			me.modelo.logo = response.data.logo;
+			me.modelo.logoName = response.data.logoName;
+			me.modelo.name = response.data.name;
+			me.modelo.nameShort = response.data.nameShort;
+			me.modelo.outOfStock = response.data.outOfStock;
+			me.modelo.price= response.data.price;
+			me.modelo.stock = response.data.stock;
+			me.modelo.stockMin = response.data.stockMin;
+			me.modelo.providerId=response.data.providers;
+			me.lists = [];
+			response.data.productPriceLists.forEach(element => {							
+				let objeto = {
+				Id: element.id,
+				PriceList: element.priceList,
+				Price: element.price,
+				isNew: false,
+				isRemoved: false,
+				isDefault: false		
+			};			
+			me.lists.push(objeto);
+			});
+
+
+
+			})
+			.catch(function(error) {
+			me.showError();
+			});
+		}, 				
 		getProducts() {
 			let me = this;
 			let url = me.URL_GET+ parseInt(me.companyId);
@@ -311,9 +385,6 @@ export default {
 			me.showError();
 			});
 		}, 								
-		gotoDetail() {
-			this.$router.push({name:'ecommerce-product-detail'})
-		},
 		//CHECKBOX -INI
       handleCheckAllBrandsChange(val) {
 		//this.checkedBrands = val ? this.brands.id : [];
@@ -347,11 +418,59 @@ export default {
         let checkedCount = value.length;
         this.checkAllProviders = checkedCount === this.brands.length;
         this.isIndeterminateProviders = checkedCount > 0 && checkedCount < this.brands.length;
-      }		  
+	  },
+      handleCheckChange(data, checked) {
+		  this.searchCategory.splice(0,this.searchCategory.length);
+		  this.searchSubCaterory.splice(0,this.searchSubCaterory.length);
+		  checked.checkedNodes.forEach(item => {
+			  if (item.children==null)
+				  this.searchSubCaterory.push(item.id);
+			  else
+			  	  this.searchCategory.push(item.id);
+		  });
+
+
+
+	  }, 	
+	  
+      handleEdit(index, row) {
+			 this.getProduct(row.id);
+			 this.dialogvisible = true
+			 
+      },
+      handleDelete(index, row) {
+		  	let currentId= row.id;
+			this.$confirm('El producto se eliminara permanentemente. Continua?', 'Cuidado', {
+			confirmButtonText: 'OK',
+			cancelButtonText: 'Cancelar',
+			type: 'warning',
+			center: true
+			}
+			).then(() => {
+				let me = this;
+                axios.put(this.URL_DELETE,{
+                    'Id':currentId
+                }).then(function(response){
+                     me.getProducts();  
+					 me.showOk();
+                     
+                }).catch(function(error){
+						me.showError(error);
+				});
+
+			}).catch(() => {
+				this.$message({
+					type: 'info',
+					message: 'Cancelado'
+				});
+			});	
+      }	  
 	  
 	},
 	created() {
 				this.URL_GET= this.$route.meta.URL_GET;	
+				this.URL_GET_PRODUCT= this.$route.meta.URL_GET_PRODUCT;	
+				this.URL_DELETE = this.$route.meta.URL_DELETE;
 				this.URL_GET_CATEGORIES = this.$route.meta.URL_GET_CATEGORIES;
 				this.URL_GET_BRANDS = this.$route.meta.URL_GET_BRANDS;
 				this.URL_GET_PROVIDERS = this.$route.meta.URL_GET_PROVIDERS;
@@ -384,6 +503,12 @@ export default {
 
 .el-checkbox  {
 	margin-right: 100%!important;	
+}
+
+.el-tree-node__content {
+	.el-checkbox {
+		margin-right: 8px!important;
+	}
 }
 
 .btnNuevoProducto {

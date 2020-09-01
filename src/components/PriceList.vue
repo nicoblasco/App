@@ -13,7 +13,7 @@
 		</el-col>
 		<el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
 			<div class="number-input">
-			<el-input-number  size="small" v-model="price.Price" controls-position="right" :min="0" class="themed mr-10 mb-10" style="width: auto"></el-input-number>
+			<el-input-number  size="small" v-model="price.Price" v-on:change="$emit('pricecalc')" controls-position="right" :min="0" class="themed mr-10 mb-10" style="width: auto"></el-input-number>
 			</div>										
 		</el-col>
 		<el-col :xs="24" :sm="2" :md="2" :lg="2" :xl="2">
@@ -40,7 +40,7 @@ export default {
 		}        
 	},
 	methods: {
-		kebabCase: _.kebabCase	
+		kebabCase: _.kebabCase
 	}
 
 }

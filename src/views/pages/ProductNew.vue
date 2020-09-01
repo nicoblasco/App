@@ -40,7 +40,7 @@
 								<el-row :gutter="20">
 									<el-col :xs="24" :sm="12" :md="12" :lg="6" :xl="6">
 										<div class="select-box mb-10">											
-											<el-input placeholder="Código" v-model="modelo.codigo" size="small"></el-input>
+											<el-input placeholder="Código" v-model="modelo.codigo" size="small" :disabled="modelo.id>0"></el-input>
 										</div>
 									</el-col>
 									<el-col :xs="24" :sm="12" :md="12" :lg="10" :xl="10">
@@ -133,7 +133,8 @@
 											v-model="modelo.categoryId"
 											class="cascade"
 											placeholder="Categorias..." 
-											size="small"           
+											size="small" 
+											:props="treeProps"          
 											:options="categories"
 											filterable clearable>
 										</el-cascader>	
@@ -188,8 +189,7 @@
 												clearable
 												class="themed" 
 												:popper-class="'themed color-accent-'+colorAccent"
-												no-data-text="No hay datos"												
-											>
+												no-data-text="No hay datos">
 												<el-option v-for="(i, index) in exchanges" :key="index" :label="i.description" :value="i.id"></el-option>
 											</el-select>
 										</div>
@@ -219,10 +219,12 @@
 										:price="item" 
 										:pricelists="pricelists" 
 										v-on:addprice="handleAddPrice()"
-										v-on:deleteprice="handleDeletePrice(item)"> 
+										v-on:deleteprice="handleDeletePrice(item)"
+										 v-on:pricecalc="priceListCalc()"> 
+
 									</price-list> 
 								</div>
-								<el-row >
+								<el-row v-if="!modelo.checkStock">
 									<el-col class="text-right">
 										<el-radio-group v-model="modelo.status" class="themed">
 											<el-radio-button label="En Stock"></el-radio-button>
@@ -237,7 +239,7 @@
 										<div class="actions-box text-right">
 											<el-switch v-model="modelo.active" active-text="Activo" inactive-text="" class="mr-20 themed"></el-switch>
 											<el-button class="themed mb-10 mr-10" type="primary" plain @click="save"><i class="mdi mdi-content-save" ></i> Guardar</el-button>
-											<el-button class="themed mb-10" type="primary" plain><i class="mdi mdi-refresh"></i> Limpiar</el-button>
+											<el-button class="themed mb-10" type="primary" plain @click="clear"><i class="mdi mdi-refresh"></i> Limpiar</el-button>
 										</div>
 									</el-col>
 								</el-row>
@@ -275,25 +277,15 @@ export default {
 				id : null,
 				price :0
 			},
-			tags_options: [
-				{
-					value: 'Chairs',
-					label: 'Chairs'
-				}, 
-				{
-					value: 'Foldable',
-					label: 'Foldable'
-				}, 
-				{
-					value: 'Garden',
-					label: 'Garden'
-				}
-			],
+			treeProps: {
+				
+				children: 'children',
+				label: 'label',
+				value: 'id'
+			},
 			tags: [],
 			title: '',
 			description: '',
-			cat: '',//bar-stools
-			cat_list: ['Dining chairs', 'Foldable chairs', 'Bar Stools', 'Garden chairs', 'Step stools', 'Junior chairs', 'High chairs', 'Fabric armchairs', 'Leather armchairs', 'Rattan armchairs', 'Swivel chairs', 'Office chairs'],
 			status: 'En Espera',
 			active: true,
 			rules: {
@@ -404,11 +396,19 @@ export default {
 			this.modelo.price =this.modelo.cost + (this.modelo.cost * this.modelo.gain / 100 );//.toFixed(2);
 			this.priceCalc();
 		},
+		priceListCalc(){
+			this.modelo.price=this.lists[0].Price;
+		},
 		save() {
 			
 			let me = this;
       		let objeto = null; 
 			this.validate();  
+			if (this.validateListaPrecio()==false)
+			{
+				this.showWarning("Existen Listas de precio duplicadas");
+				return;
+			}
 			if( this.modelo.validacionOK)
 			{
 				let loadingInstance  = Loading.service({ fullscreen: true });
@@ -434,9 +434,8 @@ export default {
 						break; 
 				 }
 
-				if (me.modelo.id==null)		
-				{
-					
+
+					//Create
 					me.objeto= {
 						   Name: me.modelo.name,
 						   Awaiting: awaiting,
@@ -462,10 +461,12 @@ export default {
 						   ProductPriceLists: []
 
 						}
+
+				if (me.modelo.id==null)		
+				{						
 					    me.modelo.providerId.forEach(prov=> {
 								me.objeto.Providers.push(prov);
 						});
-						 
 						me.lists.filter(
         					x => x.isRemoved == false && x.PriceList !=null
       					).forEach(price=> {
@@ -476,20 +477,59 @@ export default {
 								me.objeto.ProductPriceLists.push(productPriceList);
 						});
 
+				
+
+					axios.post(this.URL_CREATE, me.objeto)
+					.then(function(response) {
+						me.clear();
+
+						loadingInstance.close();
+						me.showOk();
+					})
+					.catch(function(error) {						
+						loadingInstance.close();
+						if (error.response.data.message=="Código repetido")
+							me.showWarning(error.response.data.message)
+						else
+							me.showError();
+					});
+					loadingInstance.close();
 				}
+				else
+				{
+					//update
+					me.objeto.Id= me.modelo.id;
+					me.modelo.providerId.forEach(prov=> {
+						me.objeto.Providers.push(prov);
+					});
 
-				axios.post(this.URL_CREATE, me.objeto)
-				.then(function(response) {
-					me.clear();
+					me.lists.filter(
+        					x =>  x.PriceList !=null
+      				).forEach(price=> {
+								let productPriceList = {
+									Id: null,									
+									PriceList: price.PriceList,
+									Price: price.Price,
+									IsNew: price.isNew,
+									IsRemoved: price.isRemoved
+								};
+								productPriceList.Id = price.Id ? price.Id : 0
+								me.objeto.ProductPriceLists.push(productPriceList);
+					});
 
+					axios.put(this.URL_UPDATE, me.objeto)
+					.then(function(response) {
+						me.close();
+
+						loadingInstance.close();
+						me.showOk();
+					})
+					.catch(function(error) {
+						loadingInstance.close();
+						me.showError();
+					});
 					loadingInstance.close();
-					me.showOk();
-				})
-				.catch(function(error) {
-					loadingInstance.close();
-					me.showError();
-				});
-				loadingInstance.close();
+				}
 			}
 
 		},
@@ -499,17 +539,18 @@ export default {
 			});
 		},
 		close() {
+			
 			this.clear();
 			this.$emit('update:dialogvisible', false);
+			this.$emit('refreshgrid');
 		},
 		clear() {
-
 			this.modelo.id= null;
 			this.modelo.codigo= null;
 			this.modelo.name= null;
 			this.modelo.nameShort= null;
 			this.modelo.description= null;
-			this.modelo.categoryId= null;
+			this.modelo.categoryId= [];
 			this.modelo.subCategoryId= null;
 			this.modelo.priceListIds= null;
 			this.modelo.brandId= null;
@@ -536,7 +577,24 @@ export default {
 			this.modelo.cost= 0;
 			this.modelo.gain= 0;
 			this.lists[0].Price=0;
-		}					
+		},
+		validateListaPrecio()			
+		{
+			let arr=[];
+			let esCorrecto=true;
+			this.lists.filter(x=>x.isRemoved==false).forEach(element => {
+				if (arr.length>0)
+				{
+					if( arr.includes(element.PriceList))
+					{
+						esCorrecto= false;
+						return;
+					}
+				}
+				arr.push(element.PriceList);
+			});
+			return esCorrecto;
+		}
 	},
 
 	components: {
