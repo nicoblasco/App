@@ -15,6 +15,16 @@ export default {
 		layoutPicker:true,
 		viewAnimation:false
 	},	
+	navSales: {
+		navPos: 'left',
+		toolbar: false,
+		toolbarPos: false,
+		footer: false,
+		boxed: false,
+		roundedCorners: false,
+		layoutPicker:false,
+		viewAnimation:false
+	},
 	navLeft: {
 		navPos: 'left',
 		toolbar: 'bottom',

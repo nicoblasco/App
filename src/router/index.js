@@ -7,6 +7,7 @@ import Admin from '../router/admin'
 import Tipification from '../router/typifications'
 import System from '../router/system'
 import Product from '../router/product'
+import Sale from '../router/sale'
 
 //pages
 import Login from '../views/pages/authentication/Login.vue'
@@ -137,7 +138,8 @@ const router = new Router({
 		Admin,
 		Tipification,
 		System,
-		Product
+		Product,
+		Sale
 	]
 })
 

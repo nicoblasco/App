@@ -102,6 +102,135 @@ export default {
 			}
 		},
 		{
+			path: 'deliveryturn',
+			name: 'deliveryturn',
+			component: Common,
+			meta: {
+				auth: true,
+				layout: layouts.navLeft,
+				searchable: true,
+				URL_GET: 'api/DeliveryTurns/',
+				URL_CREATE: 'api/DeliveryTurns/Create',
+				URL_UPDATE: 'api/DeliveryTurns/Update',
+				URL_DELETE: 'api/DeliveryTurns/Delete',					
+				modelo: {
+					id: '',
+					description: '',					
+					enabled: true
+				},
+				columns: [
+					{
+						label: 'Id',
+						field: 'id',
+						type: 'number',
+						tdClass: 'text-center',
+						width: '50px',
+						filterable: true
+					},
+					{
+						label: 'Turno de Entrega',
+						field: 'description',
+						type: 'text',
+						tdClass: 'text-left',
+						filterable: true
+					},
+					{
+						label: 'Acciones',
+						field: 'actions',
+						width: '180px',
+						tdClass: 'text-left',
+						html: true
+					}  				
+				]				
+			}
+		},
+		{
+			path: 'deliverytype',
+			name: 'deliverytype',
+			component: Common,
+			meta: {
+				auth: true,
+				layout: layouts.navLeft,
+				searchable: true,
+				URL_GET: 'api/DeliveryTypes/',
+				URL_CREATE: 'api/DeliveryTypes/Create',
+				URL_UPDATE: 'api/DeliveryTypes/Update',
+				URL_DELETE: 'api/DeliveryTypes/Delete',					
+				modelo: {
+					id: '',
+					description: '',					
+					enabled: true
+				},
+				columns: [
+					{
+						label: 'Id',
+						field: 'id',
+						type: 'number',
+						tdClass: 'text-center',
+						width: '50px',
+						filterable: true
+					},
+					{
+						label: 'Tipo de Entrega',
+						field: 'description',
+						type: 'text',
+						tdClass: 'text-left',
+						filterable: true
+					},
+					{
+						label: 'Acciones',
+						field: 'actions',
+						width: '180px',
+						tdClass: 'text-left',
+						html: true
+					}  				
+				]				
+			}
+		},
+		{
+			path: 'vouchertype',
+			name: 'vouchertype',
+			component: Common,
+			meta: {
+				auth: true,
+				layout: layouts.navLeft,
+				searchable: true,
+				URL_GET: 'api/VoucherTypes/',
+				URL_CREATE: 'api/VoucherTypes/Create',
+				URL_UPDATE: 'api/VoucherTypes/Update',
+				URL_DELETE: 'api/VoucherTypes/Delete',					
+				modelo: {
+					id: '',
+					description: '',					
+					enabled: true
+				},
+				columns: [
+					{
+						label: 'Id',
+						field: 'id',
+						type: 'number',
+						tdClass: 'text-center',
+						width: '50px',
+						filterable: true
+					},
+					{
+						label: 'Tipo de Comprobante',
+						field: 'description',
+						type: 'text',
+						tdClass: 'text-left',
+						filterable: true
+					},
+					{
+						label: 'Acciones',
+						field: 'actions',
+						width: '180px',
+						tdClass: 'text-left',
+						html: true
+					}  				
+				]				
+			}
+		},						
+		{
 			path: 'brand',
 			name: 'brand',
 			component: Common,
