@@ -15,6 +15,7 @@ import Profile from '../views/pages/Profile.vue'
 import NotFound from '../views/pages/NotFound.vue'
 import Provider from '../views/pages/Provider.vue'
 import Customer from '../views/pages/Customer.vue'
+import Novelty from '../views/pages/Novelty.vue'
 
 import Vehicles from '../views/pages/Vehicles.vue'
 import Devices from '../views/pages/Devices.vue'
@@ -58,10 +59,33 @@ const router = new Router({
 				URL_UPDATE: 'api/Customers/Update',
 				URL_DELETE: 'api/Customers/Delete',	
 				URL_GET_DOCUMENT_TYPE: 'api/DocumentTypes/',
-				URL_GET_PRICE_LIST: 'api/PriceLists/',
+				URL_GET_TARIFFS: 'api/Tariffs/',
 				URL_CITIES: 'api/Countries/GetFull/'
 			}
-		},		
+		},	
+		{
+			path: '/novelty',
+			name: 'novelty',
+			component: Novelty,
+			meta: {
+				auth: true,
+				layout: layouts.navLeft,		
+				searchable: true,		
+				URL_GET: 'api/Novelties/',
+				URL_GET_CUSTOMERS: 'api/Customers/',
+				URL_GET_CONCEPTS: 'api/Concepts/',
+				modelo: {
+					id: null,
+					customerId: null,
+					conceptId: null,
+					year: null,
+					month: null,
+					price: null,
+					enabled: null		
+				}
+					
+			} 
+		},				
 		{
 			path: '/provider',
 			name: 'provider',

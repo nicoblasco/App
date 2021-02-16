@@ -1,5 +1,6 @@
 import Tipification from '../views/apps/tipification/Tipification.vue'
 import Common from '../views/apps/tipification/Common.vue'
+import Check from '../views/apps/tipification/CommonWithCheck.vue'
 import Dependent from '../views/apps/tipification/Dependent.vue'
 import Cascade from '../views/apps/tipification/Cascade.vue'
 import Exchange from '../views/apps/tipification/Exchange.vue'
@@ -101,6 +102,26 @@ export default {
 				]				
 			}
 		},
+		{
+			path: 'concept',
+			name: 'concept',
+			component: Check,
+			meta: {
+				auth: true,
+				layout: layouts.navLeft,
+				searchable: true,
+				URL_GET: 'api/Concepts/',
+				URL_CREATE: 'api/Concepts/Create',
+				URL_UPDATE: 'api/Concepts/Update',
+				URL_DELETE: 'api/Concepts/Delete',					
+				modelo: {
+					id: '',
+					description: '',
+					permanent: false,					
+					enabled: true
+				}			
+			}
+		},			
 		{
 			path: 'deliveryturn',
 			name: 'deliveryturn',

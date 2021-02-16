@@ -31,6 +31,7 @@ import * as VueGoogleMaps from 'vue2-google-maps'
 import GmapCluster from 'vue2-google-maps/dist/components/cluster' // replace src with dist if you have Babel issues
 import VueGoodTable from 'vue-good-table'
 import 'vue-good-table/dist/vue-good-table.min.css'
+import { StatusIndicator } from 'vue-status-indicator'
 /* ═ ═ ═ ═ ═ ═ ═ ═ ═ *\
 |     CORE ASSETS     |
 \* ═ ═ ═ ═ ═ ═ ═ ═ ═ */
@@ -75,6 +76,7 @@ axios.defaults.baseURL ='http://localhost:64440/'
 /* ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ *\
 |  THIRD PARTS COMPONENTS |
 \* ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ */
+Vue.component('StatusIndicator', StatusIndicator)
 Vue.use(VueGoogleMaps, {
 	load: {
 		key: 'AIzaSyBC2vJqO-E5kopBBuAJ5a6ag6ugwkeBYds',	

@@ -13,7 +13,7 @@
 					v-model="search">
 				</el-input>
 
-				<div class="o-050 text-right mt-10 mb-30"><strong>{{contactsFiltered.length}}</strong> contactos</div>
+				<div class="o-050 text-right mt-10 mb-30"><strong>{{contactsFiltered.length}}</strong> {{title}}</div>
 
 				<el-button icon="mdi mdi-account-plus" @click="openDialog(null)"> Agregar {{title}}</el-button>
 
@@ -53,7 +53,7 @@
 		<user-dialog 
 			:dialogvisible.sync="dialogvisible" 
 			:documentType="documentType" 
-            :priceList = "priceList"
+            :tariffs = "data.tariffs"
 			:cities="cities" ref="dialog-provider" 
 			:data="data" 
 			v-on:addContact="save('dialog-provider')"
@@ -85,7 +85,7 @@ export default {
 			userdata: {},
 			cities:null,
             documentType:null,
-            priceList:null,
+            //tariffs:null,
 			data: {
 				id:null,
 				names: null,
@@ -94,12 +94,14 @@ export default {
 				address:null,
 				cityId:[],
                 email:null,
-                priceListId:null,
+                tariffs:null,
 				favorite:false,
 				observation:null,
 				phone:null,
 				logo: 'data:image/jpeg;base64,/9j/4QAYRXhpZgAASUkqAAgAAAAAAAAAAAAAAP/sABFEdWNreQABAAQAAAAeAAD/4QMvaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLwA8P3hwYWNrZXQgYmVnaW49Iu+7vyIgaWQ9Ilc1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCI/PiA8eDp4bXBtZXRhIHhtbG5zOng9ImFkb2JlOm5zOm1ldGEvIiB4OnhtcHRrPSJBZG9iZSBYTVAgQ29yZSA1LjYtYzE0MCA3OS4xNjA0NTEsIDIwMTcvMDUvMDYtMDE6MDg6MjEgICAgICAgICI+IDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+IDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOkExM0RGNDdBMzM1QzExRThCNjhCOTFBMEVCQUQzNDYxIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOkExM0RGNDc5MzM1QzExRThCNjhCOTFBMEVCQUQzNDYxIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE1IChXaW5kb3dzKSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkRBMUEyQ0NDMjc2QzExRTg5QUMyOTk2OTcxQkYxODMyIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkRBMUEyQ0NEMjc2QzExRTg5QUMyOTk2OTcxQkYxODMyIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+/+4AIUFkb2JlAGTAAAAAAQMAEAMCAwYAAAWZAAAGSQAACC7/2wCEABALCwsMCxAMDBAXDw0PFxsUEBAUGx8XFxcXFx8eFxoaGhoXHh4jJSclIx4vLzMzLy9AQEBAQEBAQEBAQEBAQEABEQ8PERMRFRISFRQRFBEUGhQWFhQaJhoaHBoaJjAjHh4eHiMwKy4nJycuKzU1MDA1NUBAP0BAQEBAQEBAQEBAQP/CABEIAGQAZAMBIgACEQEDEQH/xACdAAEAAgMBAQAAAAAAAAAAAAAABQYBBAcCAwEBAAMBAAAAAAAAAAAAAAAAAAECAwQQAAEEAgMBAQEAAAAAAAAAAAECAwQFEQYAIDAQQBIRAAIBAgMCCwcFAAAAAAAAAAECAxEEACExYRIgMEFRcYGRodFSExBAsSIyQnKSsiMzBRIAAQQDAQEBAAAAAAAAAAAAAQAgMBEQITFxYYH/2gAMAwEAAhEDEQAAAOgAAHzPo09syAAAACF57IRXRjichFq9f9QE/wA24RIAAHLNGyVvpwGbRebPHSPNuFZAAERLfqVa2dct+x1eKmOuOedBy19CsgAY5b1LnOlIUb5ALzSL/nawDDYABjIgIK+L155I3IjS3SlwAAAAAAAAP//aAAgBAgABBQDxQkAEAgjB6JOU8Ucq+gEkIUnhSs8Ukp6NEZ+OEfz0DihwuK4Tny//2gAIAQMAAQUA8VqyQSOA5HRQweJGB9JxwqSeZSOJUD0czj4jOehQk8/hPn//2gAIAQEAAQUA/E9IYjobtqt1Xlsl+mojypcmY7gcodmlVjrbiHW/DZ5SpN590uSp+l8L0EXX3Q0kVfhutWtif8SlS1UNcayr8JjcN6PYaK8lbek3a10+t11Mrw2C+ap482dLsHod/cQkubhfLTJlSZblDtMqucbcQ632up67Gz66NYKehdVAKF9rUmqX0ZZdfd1fXnKlHYgEWOnVUwv6JZoKdKvFGJoSs11RX1iP3f/aAAgBAgIGPwCH6VRRDRgllBaKokDxbYb7mj+N7jcX/9oACAEDAgY/AIrCtpwGWVsLQv2Xkn//2gAIAQEBBj8A9y355FiTzOwUd+NyO8hdjookUn48WFiAe8mr6SnRQNXbBmupWmkP3Ma06BoOr2LFO7TWJNGQmpjHmQnm5sLJGwZHAZWGhBzB4m6LHKJvSQcwQU+NeAI3NTbyNGPxyZf3cTfA5fzue014E7chnNOpV4kf6CLWC5ADkaLIopn+QHtVEBZ2ICqMySdAMQ2rf20Ly087Zns04lob3cMEvylZCADXTXlwX/zZleM5iKXJhsDitevAVxFGvKxevcowk9xKst23ypI9FVSeSNSde/iRQCS6lr6MR0y+5tgwZryUyudK/SuxV0GAkF0+4Mgj0kUdG/WmN311Tasag99cerdSvM/mclqdHNhYLtmmsjka5vHtU82zswskbBkcBlYaEHMHhz3JNVLFYhzRrkvjwpbGQ1NswMdfI9cuog8IqdCKHDSxAzWJzWQZlNknjwVhhQySuaKiipJw9xctW6nUKyKaqig1ptPDIIqDkQcGSCtpKcyY/oJ2ocuymD6E0Mo5K7yH4MO/FCsSjnMnguAb66G7ypCM/wBT+GN2zhCMcmkPzO3Sxz9//9k=',
-				logoName: null
+				logoName: null,
+				keyFiscal: null,
+				tariffs: []
 			},
 			formLabelWidth: '120px',
 			fields: null,
@@ -123,7 +125,7 @@ export default {
 				this.URL_DELETE= this.$route.meta.URL_DELETE;
 				this.URL_GET_DOCUMENT_TYPE = this.$route.meta.URL_GET_DOCUMENT_TYPE;
                 this.URL_CITIES = this.$route.meta.URL_CITIES;
-                this.URL_GET_PRICE_LIST = this.$route.meta.URL_GET_PRICE_LIST;
+                this.URL_GET_TARIFFS = this.$route.meta.URL_GET_TARIFFS;
 				this.screen= this.$store.getters.userProfile.role.screens.filter(x=>x.path===this.$route.fullPath)[0];	
 				if (this.screen !=null)
 				{
@@ -137,7 +139,6 @@ export default {
                     this.get();
                     this.getDocumentType();
                     this.getCities();
-                    this.getPriceList();
                     
 				}
 				else
@@ -173,13 +174,14 @@ export default {
 				this.data.cityId.push(objeto.stateId);
 				this.data.cityId.push(objeto.cityId);
 				this.data.email=objeto.email;
+				this.data.keyFiscal = objeto.keyFiscal;
 				this.data.webSite=objeto.webSite;
 				this.data.favorite=objeto.favorite;
 				this.data.observation=objeto.observation;
 				this.data.phone=objeto.phone;
 				this.data.logo= objeto.logo;
                 this.data.logoName= objeto.logoName;
-                this.data.priceListId=objeto.priceListId;
+                this.data.tariffs=objeto.tariffs;
 				this.editedIndex=0;
 				
 			}
@@ -188,7 +190,7 @@ export default {
 				this.editedIndex=-1;				
 			}
 				
-
+			this.getTariffs();
 			this.dialogvisible = true
 		},
 		setPageWidth() {
@@ -217,18 +219,22 @@ export default {
 			.catch(function(error) {
 			me.showError();
 			});
-        },  	
-		getPriceList() {
+        }, 
+		getTariffs() {
 			let me = this;
-			let url = me.URL_GET_PRICE_LIST+ parseInt(me.companyId);
-			axios.get(url)
+			let url = me.URL_GET_TARIFFS;
+			axios.get(url,{	params : {
+			   	'CompanyId' : parseInt(me.companyId),
+				'CustomerId' : me.data.id				
+				}
+			})
 			.then(function(response) {
-			me.priceList = response.data;
+			me.data.tariffs = response.data;
 			})
 			.catch(function(error) {
 			me.showError();
 			});
-		},          			
+		}, 		         			
 		get(){
 			let me = this;
 			let url = this.URL_GET+ parseInt(me.companyId);
@@ -247,23 +253,20 @@ export default {
 				let provincia=null;
 				let pais=null;
                 let documentoId=null;
-                let listaPrecio=null;
 				if (me.data.cityId.length>0)
 				{
 					pais=me.data.cityId[0];
 					provincia=me.data.cityId[1];
 					ciudad=me.data.cityId[2];
 				}
-				if (me.data.priceList>0){
+				if (me.data.documentTypeId>0){
 					documentoId=me.data.documentTypeId;
-                }
-				if (me.data.priceListId>0){
-					listaPrecio=me.data.priceListId;
-				}                
+                } 				
 
             if (me.editedIndex === 0) {
 				//Editar
-                axios.put(this.URL_UPDATE,{
+
+				 let objeto_upd = {
                     'Id': me.data.id,
 					'Names':me.data.names,
 					'DocumentTypeId': documentoId,	
@@ -273,13 +276,28 @@ export default {
 					'StateId':provincia,
 					'CityId':ciudad,
 					'Email':me.data.email,
+					'KeyFiscal': me.data.keyFiscal,
 					'Favorite':me.data.favorite,
 					'Observation':me.data.observation,
 					'Phone':me.data.phone,
 					'Logo': me.data.logo,
                     'LogoName': me.data.logoName,
-                    'PriceListId': listaPrecio
-                }).then(function(response){
+                    'Tariffs': []					 
+				 }
+
+				
+				me.data.tariffs.forEach(tarifa=> {
+					let objTarifa= {
+						Id: tarifa.id,
+						ConceptId: tarifa.conceptId,
+						Price: tarifa.price,
+						Enabled: tarifa.enabled
+					}
+					objeto_upd.Tariffs.push(objTarifa);
+				});
+
+                axios.put(this.URL_UPDATE,objeto_upd
+				).then(function(response){
                      me.close();
                      me.get();   
 					 me.clean();
@@ -289,12 +307,9 @@ export default {
                     me.showError(error);
                 });
                 
-            } else {
-				
-
-
-
-                axios.post(this.URL_CREATE,{
+            } else {	
+				 let objeto_add = {
+					'CompanyId': me.companyId,
 					'Names':me.data.names,
 					'DocumentTypeId': documentoId,	
 					'Documento':me.data.documento,
@@ -303,14 +318,29 @@ export default {
 					'StateId':provincia,
 					'CityId':ciudad,
 					'Email':me.data.email,
-					'CompanyId':me.companyId,
+					'KeyFiscal': me.data.keyFiscal,
 					'Favorite':me.data.favorite,
 					'Observation':me.data.observation,
 					'Phone':me.data.phone,
 					'Logo': me.data.logo,
                     'LogoName': me.data.logoName,
-                    'PriceListId': listaPrecio
-                }).then(function(response){
+                    'Tariffs': []					 
+				 }
+
+				
+				me.data.tariffs.forEach(tarifa=> {
+					let objTarifa= {
+						Id: tarifa.id,
+						ConceptId: tarifa.conceptId,
+						Price: tarifa.price,
+						Enabled: tarifa.enabled
+					}
+					objeto_add.Tariffs.push(objTarifa);
+				});				
+
+                axios.post(this.URL_CREATE,
+				 objeto_add
+                ).then(function(response){
                      me.close();
                      me.get();   
 					 me.clean();
@@ -364,8 +394,9 @@ export default {
 			this.data.address=null;
 			this.data.cityId=[];
 			this.data.email=null;
+			this.data.keyFiscal=null;
             this.data.documentTypeId=null;
-            this.data.priceListId=null;
+            this.data.tariffs=null;
 			this.data.favorite=false;
 			this.data.observation=null;
 			this.data.phone=null;

@@ -251,7 +251,6 @@ export default {
 	methods: {
 
 		openDialog(objeto) {
-
 			this.dialogvisible = true
 		},		
 		filterTag(value, row) {

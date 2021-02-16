@@ -1,0 +1,585 @@
+<template>
+	<div class="page-ecommerce-products flex">
+		
+		<div :class="{'sidebar':true, 'open':sidebarOpen}">
+			<vue-scroll class="scroller">
+				<div class="widget close-filter-box">
+					<button @click="sidebarOpen = false">
+						close filter
+					</button>
+				</div>
+				<div class="widget">
+					<div class="title">Busqueda rápida</div>
+					<div class="content">
+						<el-input size="mini" placeholder="CLIENTE" v-model="searchCustomer"  clearable> </el-input>
+						<div style="margin: 10px 0;"></div>
+						<el-input size="mini" placeholder="CONCEPTO" v-model="searchConcept"  clearable> </el-input>
+					</div>
+				</div>				
+				<div class="widget select-color">
+					<div class="title">Clientes</div>
+                        <el-input
+                            placeholder="buscar"
+                            prefix-icon="el-icon-search"
+                            size="mini"
+                            v-model="filterText">  
+                        </el-input>                     
+					<div class="content">                     
+						<el-checkbox :indeterminate="isIndeterminateCustomer" v-model="checkAllCustomers" @change="handleCheckAllCustomersChange">Marcar todos</el-checkbox>                        
+						<div style="margin: 15px 0;"></div>
+						<el-checkbox-group v-model="checkedCustomers" @change="handleCheckedCustomersChange">
+							<el-checkbox v-for="b in customers" :label="b.id" :key="b.id">{{b.names}}</el-checkbox>
+						</el-checkbox-group>
+					</div>
+				</div>
+				<div class="widget select-color">
+					<div class="title">Conceptos</div>
+                      <el-input
+                            placeholder="buscar"
+                            prefix-icon="el-icon-search"
+                            size="mini"
+                            v-model="filterText">  
+                        </el-input>                       
+					<div class="content">
+						<el-checkbox :indeterminate="isIndeterminateConcept" v-model="checkAllConcepts" @change="handleCheckAllConceptsChange">Marcar todos</el-checkbox>
+						<div style="margin: 15px 0;"></div>
+						<el-checkbox-group v-model="checkedConcepts" @change="handleCheckedConceptsChange">
+							<el-checkbox v-for="b in concepts" :label="b.id" :key="b.id">{{b.description}}</el-checkbox>
+						</el-checkbox-group>
+					</div>
+				</div>	
+				<div class="widget close-filter-box">
+					<button @click="sidebarOpen = false">
+						close filter
+					</button>
+				</div>
+			</vue-scroll>
+		</div>
+
+		<div class="list-container box grow flex column">
+			<!-- <vue-scroll class="table-box card-base card-outline">
+								<table class="styled striped hover">
+									<tbody>										
+										<tr v-for="item in tariffs" :key="item.conceptId">										 -->
+											<!-- <td>
+												<div class="item-box item-product">
+													<div>
+														<h4 class="m-0 mb-5">{{item.concept}}</h4>
+													</div>
+												</div>
+											</td>
+											<td>
+												<div class="item-box item-product">
+													<div>
+														<el-input-number  v-if="item.permanent"
+															v-model="item.price" 
+															:precision="2" 
+															:controls="false"
+															:min="0">
+														</el-input-number>
+													</div>
+												</div>												
+											</td>
+											<td>
+												<el-switch
+													v-model="item.enabled"
+													active-color="#13ce66"
+													inactive-color="#ff4949">
+												</el-switch>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+			</vue-scroll> --> 
+
+
+		</div>	
+	</div>
+</template>
+
+<script>
+import 'tui-grid/dist/tui-grid.min.css'
+import Chance from 'chance'
+import axios from 'axios'
+const chance = new Chance()
+export default {
+	name: 'Novelties',
+	data () {
+		return {			
+		    grid: null,
+			gridData: [],
+			resizing: false,
+			height: 300,
+			sidebarOpen: false,
+			customers:null,
+			concepts:null,
+			searchCustomer: null,
+			searchConcept: null,
+			allownew: false,
+			checkAllCustomers: false,
+			checkedCustomers: [],
+			isIndeterminateCustomer: true,
+			checkAllConcepts: false,
+			checkedConcepts: [],
+			isIndeterminateConcept: true,            
+			dialogvisible: false,
+			modelo: null,
+            filterText: null
+		}
+	},
+	computed: {
+		noveltiesFilter: function() {
+		let codigo = null;
+		let description = null;
+		if (this.searchCustomer!=null)
+		{
+			codigo=searchCustomer.toUpperCase();
+		}
+		if (this.searchConcept!=null)
+		{
+			description=this.searchConcept.toUpperCase();
+		}		
+		return this.gridData.filter(			
+			x => { 
+				return (x.codigo.toUpperCase().includes(codigo) || codigo==null) 
+				&& (x.name.toUpperCase().includes(description) || description==null)
+				&& (this.checkedCustomers.length==0 || this.checkedCustomers.includes(x.customerId) )
+                && (this.checkedConcepts.length==0 || this.checkedConcepts.includes(x.conceptId) )
+
+			})			
+		},
+	},
+	methods: {
+
+		filterTag(value, row) {
+			return row.tag === value;
+		},	
+				
+		getNovelties() {
+			let me = this;
+			let url = me.URL_GET+ parseInt(me.companyId);
+			axios.get(url)
+			.then(function(response) {				
+			me.gridData = response.data;
+			})
+			.catch(function(error) {
+			me.showError();
+			});
+		}, 	
+		getCustomers() {
+			let me = this;
+			let url = me.URL_GET_CUSTOMERS+ parseInt(me.companyId);
+			axios.get(url)
+			.then(function(response) {
+			me.customers = response.data;
+			})
+			.catch(function(error) {
+			me.showError();
+			});
+		}, 	
+		getConcepts() {
+			let me = this;
+			let url = me.URL_GET_CONCEPTS+ parseInt(me.companyId);
+			axios.get(url)
+			.then(function(response) {
+			me.concepts = response.data;
+			})
+			.catch(function(error) {
+			me.showError();
+			});
+		}, 		
+							
+		//CHECKBOX -INI
+      handleCheckAllCustomersChange(val) {
+	
+		this.checkedCustomers=[];
+		if (val)
+		{
+			this.customers.forEach(element => {
+				this.checkedCustomers.push(element.id);
+			});
+		}
+
+		 this.isIndeterminateBrand = false;
+      },
+      handleCheckedCustomersChange(value) {
+        let checkedCount = value.length;
+        this.checkAllCustomers = checkedCount === this.customers.length;
+        this.isIndeterminateCustomer = checkedCount > 0 && checkedCount < this.customers.length;
+	  }	,
+
+      handleCheckAllConceptsChange(val) {
+		this.checkedConcepts=[];
+		if (val)
+		{
+			this.concepts.forEach(element => {
+				this.checkedConcepts.push(element.id);
+			});
+		}
+
+		 this.isIndeterminateProviders = false;
+      },
+      handleCheckedConceptsChange(value) {
+        let checkedCount = value.length;
+        this.checkAllConcepts = checkedCount === this.concepts.length;
+        this.isIndeterminateConcepts = checkedCount > 0 && checkedCount < this.brands.length;
+	  },
+	  
+	  
+	},
+	created() {
+				this.URL_GET= this.$route.meta.URL_GET;	
+				this.URL_GET_NOVELTIES= this.$route.meta.URL_GET_NOVELTIES;	
+				this.URL_GET_CUSTOMERS = this.$route.meta.URL_GET_CUSTOMERS;
+				this.URL_GET_CONCEPTS = this.$route.meta.URL_GET_CONCEPTS;
+				this.companyId = parseInt( this.$store.getters.user.CompanyId);
+				this.modelo = this.$route.meta.modelo;
+				this.getCustomers();
+				this.getConcepts();
+				//this.getNovelties();			
+	},
+	mounted() {
+	}
+}
+</script>
+
+<style lang="scss">
+@import '../../assets/scss/_variables';
+
+
+.el-checkbox  {
+	margin-right: 100%!important;	
+}
+
+.el-tree-node__content {
+	.el-checkbox {
+		margin-right: 8px!important;
+	}
+}
+
+.btnNuevoProducto {
+	width: 100%;
+	margin-bottom: 10px;
+}
+
+
+.page-ecommerce-products {
+	#grid {
+		.tui-grid-cell[data-column-name="logo"] {
+			.tui-grid-cell-content {
+				padding: 0px!important; 
+			}
+		}
+
+		.tui-grid-border-line-top {
+			background-color: transparent;
+		}
+		.tui-grid-cell-head {
+			border-top-color: transparent;
+		}
+	
+/*		.tui-grid-cell-head[data-column-name="mergeColumn1"] ,
+		.tui-grid-cell-head[data-column-name="mergeColumn2"] ,
+		.tui-grid-cell-head[data-column-name="mergeColumn3"] ,
+		.tui-grid-cell-head[data-column-name="mergeColumn4"] ,
+		.tui-grid-cell-head[data-column-name="mergeColumn5"] ,
+		.tui-grid-cell-head[data-column-name="mergeColumn6"] {
+			background: #f4f4f4;
+			color: #8e8e8e;
+		}*/
+
+		.tui-grid-cell-content {
+			.en-espera {
+				color: #9e9e9e;
+				font-weight: bold;
+			}
+			.ultimos {
+				color: #9e9e9e;
+				font-weight: bold;
+			}			
+			.sin-stock {
+				color: #ff005c;
+				font-weight: bold;
+			}
+			.en-stock {
+				color: #1ac367;
+				font-weight: bold;
+			}
+		}
+	}
+	.sidebar {
+		width: 300px;
+		margin-right: 20px;
+		margin-right: 10px;
+		margin-left: -10px;
+
+		.scroller {
+			padding: 10px;
+			padding-top: 0px;
+			width: 100%;
+			height: 100%;
+			box-sizing: border-box;
+		}
+
+		.widget {
+			background: white;
+			border-radius: 4px;
+			margin-bottom: 20px;
+			box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.07), 0 3px 6px 0 rgba(0, 0, 0, 0.065);
+			overflow: hidden;
+
+			&.close-filter-box {
+				display: none;
+				text-align: center;
+
+				button {
+					width: 100%;
+					border: none;
+					text-transform: uppercase;
+					outline: none;
+					font-family: inherit;
+					font-weight: bold;
+					padding: 5px 0px;
+					border-bottom: 2px solid;
+					background: white;
+					color: $text-color-accent;
+					cursor: pointer;
+				}
+			}
+
+			&.select-color {
+				ul, li {
+					padding: 0;
+					list-style: none;
+					margin: 0;
+				}
+
+				li {
+					margin-bottom: 10px;
+				}
+
+				.color-box {
+					background: transparent;
+					width: 12px;
+					height: 12px;
+					display: inline-block;
+					margin-right: 10px;
+				}
+			}
+
+			.title {
+				border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+				padding: 15px 20px;
+			}
+			.content {
+				padding: 15px 20px;
+			}
+		}
+	}
+
+	.toggle-filter-box {
+		padding: 10px;
+		padding-top: 0px;
+		text-align: right;
+		display: none;
+
+		button {
+			border: none;
+			text-transform: uppercase;
+			outline: none;
+			font-family: inherit;
+			font-weight: bold;
+			padding: 1px 2px;
+			border-bottom: 2px solid;
+			color: $text-color-accent;
+			background: transparent;
+			cursor: pointer;
+		}
+	}
+
+	.list {
+		.item {
+			display: block;
+			width: 25%;
+			height: 400px;
+			padding: 0 10px;
+			padding-bottom: 20px;
+			box-sizing: border-box;
+			float: left;
+
+			.wrapper {
+				box-sizing: border-box;
+				height: 100%;
+				position: relative;
+				cursor: pointer;
+				transition: all .25s;
+
+				.image {
+					box-sizing: border-box;
+					height: 150px;
+					width: 100%;
+					background-color: white;	
+					padding-bottom: 10px;		
+
+					.bg {
+						background-color: white;			
+						background-size: contain;
+						background-repeat: no-repeat;
+						background-position: center center;
+						width: 100%;
+						height: 100%;
+					}
+				}
+
+				.detail {
+					padding-top: 10px;
+
+					.rate {
+						margin-top: 10px; 
+
+						& > div {
+							margin: 0 auto;
+							display: block;
+							width: 120px;
+						}
+					}
+
+					.name {
+						text-transform: uppercase;
+						font-weight: bold;
+						text-align: center;
+						padding: 10px;
+						padding-bottom: 5px;
+					}
+
+					.desc {
+						text-align: center;
+						font-size: 14px;
+						opacity: .5;
+					}
+
+					.price {
+						text-align: center;
+						font-weight: bold;
+						font-size: 22px;
+						padding: 10px;
+						color: $text-color-accent;
+					}
+				}
+
+				.buttons {
+					position: absolute;
+					left: 20px;
+					bottom: 20px;
+					right: 20px; 
+
+					button {
+						background: white;
+						color: $text-color;
+						border: none;
+						text-transform: uppercase;
+						outline: none;
+						font-family: inherit;
+						font-weight: bold;
+						padding: 3px 7px;
+					}
+				}
+
+				&:hover {
+					box-shadow: 0 8px 16px 0 rgba(40, 40, 90, 0.09), 0 3px 6px 0 rgba(0, 0, 0, 0.065), 0px 10px 0px 0px $text-color-accent;
+				}
+			}
+		}
+	}
+}
+
+@media (max-width: 1400px) {
+	.page-ecommerce-products {
+
+		.list {
+			.item {
+				width: 33.33%;
+			}
+		}
+	}
+}
+
+
+@media (max-width: 1100px) {
+	.page-ecommerce-products {
+
+		.list {
+			.item {
+				width: 50%;
+			}
+		}
+	}
+}
+
+
+
+@media (max-width: 900px) {
+	.page-ecommerce-products {
+
+		.sidebar {
+			width: 200px;
+		}
+
+	}
+}
+
+@media (max-width: 768px) {
+	.page-ecommerce-products {
+
+		.sidebar {
+			width: 230px;
+			position: absolute;
+			top: 0;
+			left: 0;
+			bottom: 0;
+			margin: 0;
+			z-index: 999;
+			transform: translateX(-100%);
+			transition: all .25s;
+			background: white;
+
+			.scroller {				
+				padding: 15px;
+				padding-top: 20px;
+			}
+
+			.widget {
+				&.close-filter-box {
+					display: block;
+				}
+			}
+
+			&.open {
+				transform: translateX(0%);
+				box-shadow: 3px 0px 10px -3px rgba(0, 0, 0, 0.4);
+				border-top-left-radius: 4px;
+				border-top-right-radius: 4px;
+			}
+		}
+
+		.toggle-filter-box {
+			display: block;
+		}
+
+	}
+}
+
+@media (max-width: 480px) {
+	.page-ecommerce-products {
+
+		.list {
+			.item {
+				width: 100%;
+			}
+		}
+	}
+}
+
+</style>
+
+

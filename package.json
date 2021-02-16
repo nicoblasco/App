@@ -41,6 +41,7 @@
     "vue-perfect-scrollbar": "^0.1.0",
     "vue-resize": "^0.4.5",
     "vue-router": "^3.0.6",
+    "vue-status-indicator": "^1.2.1",
     "vue2-google-maps": "^0.10.7",
     "vue2-leaflet": "^2.5.2",
     "vuebar": "0.0.20",

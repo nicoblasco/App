@@ -16,9 +16,7 @@
 									placeholder="Seleccione" 
 									filterable
 									:no-match-text="datoNoEncontrado"
-									:no-data-text= "noHayDatos"										
-	
-								>
+									:no-data-text= "noHayDatos">
 									<el-option v-for="item in customers" :key="item.id" :label="item.names" :value="item.id"></el-option>
 								</el-select>
 								</el-form-item>
@@ -171,7 +169,7 @@
 						</el-col>
 						<el-col :xs="24" :sm="24" :md="4" :lg="1" :xl="1">	
 							<div class="flex justify-space-between margen-top-40">
-								<el-button type="primary" icon="el-icon-search" circle size="mini"></el-button>
+								<el-button type="primary" icon="el-icon-search" circle size="mini"  @click="openDialogProduct()"></el-button>
 							</div>
 						</el-col>
 						<el-col :xs="24" :sm="24" :md="8" :lg="6" :xl="6">	
@@ -242,6 +240,49 @@
 						</el-col>																							
 					</el-row>
                 </div>
+				<el-dialog title="Productos" :visible.sync="dialogProductVisible" width="80%">
+					<el-table :data="products.filter(x => !search || x.name.toLowerCase().includes(search.toLowerCase())|| x.codigo.toLowerCase().includes(search.toLowerCase()))" 
+						@selection-change="handleSelectionChange" 
+						:default-sort = "{prop: 'name', order: 'ascending'}"
+						height="400"
+
+						:row-class-name="tableRowClassName">
+					    <el-table-column type="selection" width="30"></el-table-column>
+						<el-table-column property="codigo" label="Codigo" width="90" sortable fixed></el-table-column>
+						<el-table-column property="name" label="Producto" width="200" sortable fixed></el-table-column>
+						<el-table-column property="stock" label="Stock" width="70" ></el-table-column>
+						<el-table-column property="price" label="Precio" width="70"></el-table-column>
+						<el-table-column property="brand" label="Marca" width="150"></el-table-column>
+						<el-table-column property="category" label="Rubro" width="150"></el-table-column>
+						<el-table-column property="subCategory" label="SubRubro" width="150"></el-table-column>
+						<el-table-column
+							sortable
+							prop="status"
+							label="Estado"
+							width="120"
+							:filters="[{ text: 'En Stock', value: 'En Stock' }, { text: 'Sin Stock', value: 'Sin Stock' }, { text: 'En Espera', value: 'En Espera' }, { text: 'Ultimos', value: 'Ultimos' }]"
+							:filter-method="filterTag"
+							filter-placement="bottom-end">				
+							<template slot-scope="scope">
+								<el-tag
+								:type="scope.row.status === 'En Stock' ? 'success' : (scope.row.status === 'Sin Stock'? 'danger': 'warning' ) "
+								disable-transitions>{{scope.row.status}}</el-tag>
+							</template>	
+						</el-table-column>
+						<el-table-column align="left" width="200">
+							<template slot="header">
+								<el-input
+								v-model="search"
+								size="mini"
+								placeholder="Buscar"/>
+							</template>	
+						</el-table-column>					
+					</el-table>
+					<span slot="footer" class="dialog-footer">
+						<el-button @click="dialogProductVisible = false">Cancelar</el-button>
+						<el-button type="primary" @click="pushSaleDetail()">Agregar</el-button>
+					</span>
+				</el-dialog>
             </div>
         
             <div class="widget detail card-shadow--small b-rad-4">
@@ -273,7 +314,7 @@
 								<span> Total </span>
 							</el-col>																																							
 						</el-row>						
-						<div v-for="c in sale_details" :key="c.code">
+						<div v-for="(c,index) in sale_details" :key="index">
 							<el-row>
 								<el-col :xs="3" :sm="3" :md="3" :lg="3" :xl="3">
 									<span> {{c.code}} </span>
@@ -296,15 +337,12 @@
 								<el-col :xs="3" :sm="3" :md="3" :lg="2" :xl="2">
 									<span> {{c.total}} </span>
 								</el-col>
-								<el-col :xs="1" :sm="1" :md="2" :lg="2" :xl="2">	
+								<!-- <el-col :xs="1" :sm="1" :md="2" :lg="2" :xl="2">	
 									<div>
-										<!-- <el-button type="danger" icon="el-icon-delete" circle size="mini" ></el-button> -->
-										  <!-- <el-link icon="el-icon-edit">Edit</el-link> -->
 										  <el-link><i class="el-icon-edit el-icon--right color-green"></i> </el-link>
 										  <el-link><i class="el-icon-delete el-icon--right color-red"></i> </el-link>
-										<!-- @click="addProduct" -->
 									</div>
-								</el-col>									
+								</el-col>									 -->
 							</el-row>
 						</div>
 					</div>
@@ -362,8 +400,11 @@ export default {
 			priceLists: null,
 			deliveryTurns: null,
 			paymentMethods: null,
-			products: null,
+			products: [],
 			sale_details: [],
+			multipleSelection: [],
+			dialogProductVisible: false,
+			search: '',
 			datoNoEncontrado: "Dato no encontrado",
 			noHayDatos: "No hay datos",			
 			pickerOptions: {
@@ -391,7 +432,7 @@ export default {
 		}
 	},
 	methods: {
-		getLista(lista,ruta) {
+	 getLista(lista,ruta) {
 			let me = this;
 			let url = ruta + parseInt(me.companyId);
 			axios.get(url)
@@ -401,7 +442,49 @@ export default {
 			.catch(function(error) {
 				me.showError();
 			});
-		}, 	
+		}, 			
+      handleSelectionChange(val) {
+        this.multipleSelection = val;
+	   },		
+	  filterTag(value, row) {
+			return row.tag === value;
+		},	   
+	   tableRowClassName({row, rowIndex}) {
+        if (row.stock > row.stockMin && row.stock >0) {
+          return 'success-row';
+		} 
+		if (row.stock ===0)
+		{
+			return 'error-row'
+		}
+		else
+		{
+			return 'warning-row'
+		}
+
+        return '';
+	   },
+	    pushSaleDetail() {
+		 	this.dialogProductVisible = false;
+			this.addProductFromGrid();
+		},
+		addProductFromGrid() {
+			let me = this;
+			let objeto = null; 
+			me.multipleSelection.forEach(element => {				
+				me.objeto= {
+				code: element.codigo,
+				product: element.name,
+				quantity: 1,
+				price: element.price,
+				discount: 0,
+				subtotal: element.price,
+				total: element.price
+				}
+				me.sale_details.push(me.objeto);
+			});			
+			me.clearProduct();
+		},
 		addProduct() {
 			let me = this;
 			let objeto = null; 
@@ -416,6 +499,10 @@ export default {
 			}
 			me.sale_details.push(me.objeto);
 			me.clearProduct();
+		},
+		openDialogProduct() {
+			this.getLista('products',this.URL_GET_PRODUCTS);
+			this.dialogProductVisible=true;
 		},
 		clearProduct(){
 			   this.modelo.code= null;
@@ -474,6 +561,18 @@ export default {
 		font-weight: bold;
 	}
 
+	.el-table .warning-row {
+		background: oldlace;
+	}
+
+	.el-table .success-row {
+		background: #f0f9eb;
+	}
+
+	.el-table .error-row {
+		background: #e4aeae;
+	}
+
 	.label-arriba {
 		label {
 			display: block;
@@ -507,6 +606,10 @@ export default {
 
 	.color-red {
 		color: red;
+	}
+
+	.dialog-product{
+		width: 80%;
 	}
 
 	.widget {
