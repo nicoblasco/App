@@ -74,6 +74,7 @@ const router = new Router({
 				URL_GET: 'api/Novelties/',
 				URL_GET_CUSTOMERS: 'api/Customers/',
 				URL_GET_CONCEPTS: 'api/Concepts/',
+				URL_GET_NOVELTIES: 'api/Novelties/',
 				modelo: {
 					id: null,
 					customerId: null,

@@ -11,6 +11,20 @@
 				<div class="widget">
 					<div class="title">Busqueda rápida</div>
 					<div class="content">
+						<div class="añoMes">
+							<el-col class="label2" :span="3"> 
+								Año 
+							</el-col>
+							<el-col :span="7">
+								<el-input size="mini" v-model="year"></el-input>					
+							</el-col>
+							<el-col class="label3" :span="3"> 
+								Mes 
+							</el-col>
+							<el-col :span="7">
+								<el-input size="mini"  v-model="month"></el-input>					
+							</el-col>						
+						</div>
 						<el-input size="mini" placeholder="CLIENTE" v-model="searchCustomer"  clearable> </el-input>
 						<div style="margin: 10px 0;"></div>
 						<el-input size="mini" placeholder="CONCEPTO" v-model="searchConcept"  clearable> </el-input>
@@ -57,40 +71,51 @@
 		</div>
 
 		<div class="list-container box grow flex column">
-			<!-- <vue-scroll class="table-box card-base card-outline">
-								<table class="styled striped hover">
-									<tbody>										
-										<tr v-for="item in tariffs" :key="item.conceptId">										 -->
-											<!-- <td>
-												<div class="item-box item-product">
-													<div>
-														<h4 class="m-0 mb-5">{{item.concept}}</h4>
-													</div>
-												</div>
-											</td>
-											<td>
-												<div class="item-box item-product">
-													<div>
-														<el-input-number  v-if="item.permanent"
-															v-model="item.price" 
-															:precision="2" 
-															:controls="false"
-															:min="0">
-														</el-input-number>
-													</div>
-												</div>												
-											</td>
-											<td>
-												<el-switch
-													v-model="item.enabled"
-													active-color="#13ce66"
-													inactive-color="#ff4949">
-												</el-switch>
-											</td>
-										</tr>
-									</tbody>
-								</table>
-			</vue-scroll> --> 
+	   		<vue-scroll class="table-box card-base card-outline">
+				<table class="styled striped hover">
+					<tbody>										
+						<tr v-for="cliente in novelties" :key="cliente.customerId">
+							<el-row :gutter="20" >
+								<el-col :span="22" :offset="1">
+									<h3 class="bg-accent-lighter b-rad-14" style="padding: 8px;">
+										{{cliente.customerName}}
+									</h3>
+								</el-col>
+							</el-row>
+
+							<div v-for="tarifa in cliente.novelties" :key="tarifa.tariffId">																
+								<el-row :gutter="20" v-if="tarifa.tariffEnabled">										
+									<el-col :span="8" :offset="3">
+										<div class="item-box item-product">
+											<h4 class="color-concept">{{tarifa.concept.description}}</h4>
+										</div>												
+									</el-col>																	
+									<el-col :span="1" :offset="3">
+										<div class="item-box item-product">
+											<div>												
+												<el-input-number
+													v-model="tarifa.price" 
+													:precision="2" 
+													:controls="false"
+													:min="0">
+												</el-input-number>
+											</div>
+										</div>												
+									</el-col>
+								
+									<el-col :span="1" :offset="6">
+										<el-switch
+											v-model="tarifa.noveltyEnabled"
+											active-color="#13ce66"
+											inactive-color="#ff4949">
+										</el-switch>
+									</el-col>
+								</el-row>
+							</div>
+						</tr>
+					</tbody>
+				</table>
+			</vue-scroll> 
 
 
 		</div>	
@@ -124,25 +149,29 @@ export default {
 			isIndeterminateConcept: true,            
 			dialogvisible: false,
 			modelo: null,
-            filterText: null
+			novelties: null,
+            filterText: null,
+			month: '02',
+			year: '2021'
 		}
 	},
 	computed: {
 		noveltiesFilter: function() {
-		let codigo = null;
-		let description = null;
+		let cliente = null;
+		let concepto = null;
 		if (this.searchCustomer!=null)
 		{
-			codigo=searchCustomer.toUpperCase();
+			cliente=searchCustomer.toUpperCase();
 		}
 		if (this.searchConcept!=null)
 		{
-			description=this.searchConcept.toUpperCase();
+			concepto=this.searchConcept.toUpperCase();
 		}		
-		return this.gridData.filter(			
+		debugger
+		return this.novelties.filter(			
 			x => { 
-				return (x.codigo.toUpperCase().includes(codigo) || codigo==null) 
-				&& (x.name.toUpperCase().includes(description) || description==null)
+				return (x.customerName.toUpperCase().includes(cliente) || cliente==null) 
+				 && (x.name.toUpperCase().includes(concepto) || concepto==null)
 				&& (this.checkedCustomers.length==0 || this.checkedCustomers.includes(x.customerId) )
                 && (this.checkedConcepts.length==0 || this.checkedConcepts.includes(x.conceptId) )
 
@@ -157,15 +186,20 @@ export default {
 				
 		getNovelties() {
 			let me = this;
-			let url = me.URL_GET+ parseInt(me.companyId);
-			axios.get(url)
-			.then(function(response) {				
-			me.gridData = response.data;
+			let url = me.URL_GET_NOVELTIES;
+			axios.get(url,{	params : {
+			   	'CompanyId' : parseInt(me.companyId),
+				'Year' : me.year,
+				'Month': me.month				
+				}
+			})
+			.then(function(response) {
+				me.novelties = response.data;
 			})
 			.catch(function(error) {
 			me.showError();
 			});
-		}, 	
+		},
 		getCustomers() {
 			let me = this;
 			let url = me.URL_GET_CUSTOMERS+ parseInt(me.companyId);
@@ -223,8 +257,7 @@ export default {
         let checkedCount = value.length;
         this.checkAllConcepts = checkedCount === this.concepts.length;
         this.isIndeterminateConcepts = checkedCount > 0 && checkedCount < this.brands.length;
-	  },
-	  
+	  }
 	  
 	},
 	created() {
@@ -236,7 +269,7 @@ export default {
 				this.modelo = this.$route.meta.modelo;
 				this.getCustomers();
 				this.getConcepts();
-				//this.getNovelties();			
+				this.getNovelties();			
 	},
 	mounted() {
 	}
@@ -257,11 +290,44 @@ export default {
 	}
 }
 
+.color-concept {
+	color: currentColor;
+}
+
+.el-input-number.is-without-controls .el-input__inner {
+    padding-left: 15px;
+    padding-right: 15px;
+    color: #5f8fdf;
+    background-color: transparent;
+    border-color: rgba(95,143,223,.3);
+    font-family: inherit;
+    font-weight: 800;
+	border-left: 0px;
+    border-right: 0px;
+    border-top: 0px;
+    font-size: larger;
+	border-block-width: revert;
+	}
+
 .btnNuevoProducto {
 	width: 100%;
 	margin-bottom: 10px;
 }
 
+.label2 {
+	padding-right: 3pc;
+    padding-top: 3px;
+}
+
+.label3 {
+	padding-right: 3pc;
+	padding-left: 4px;
+    padding-top: 3px;
+}
+
+.añoMes {
+    margin-bottom: 37px;
+}
 
 .page-ecommerce-products {
 	#grid {
