@@ -15,29 +15,31 @@
 							<el-col class="label2" :span="3"> 
 								Año 
 							</el-col>
-							<el-col :span="7">
-								<el-input size="mini" v-model="year"></el-input>					
+							<el-col :span="18">
+								<el-input-number size="mini" :min="2000" :max="2100" v-model="year" @change="handleChangeDate"></el-input-number>					
 							</el-col>
-							<el-col class="label3" :span="3"> 
+							<el-col class="label2" :span="3"> 
 								Mes 
 							</el-col>
-							<el-col :span="7">
-								<el-input size="mini"  v-model="month"></el-input>					
+							<el-col :span="18">
+								<el-input-number size="mini" :min="1" :max="12"  v-model="month" @change="handleChangeDate" ></el-input-number>					
 							</el-col>						
 						</div>
-						<el-input size="mini" placeholder="CLIENTE" v-model="searchCustomer"  clearable> </el-input>
-						<div style="margin: 10px 0;"></div>
-						<el-input size="mini" placeholder="CONCEPTO" v-model="searchConcept"  clearable> </el-input>
+						<div class="cliente-concepto">
+							<el-input size="mini" placeholder="CLIENTE" v-model="searchCustomer"  clearable> </el-input>
+							<!-- <div style="margin: 10px 0;"></div>
+							<el-input size="mini" placeholder="CONCEPTO" v-model="searchConcept"  clearable> </el-input> -->
+						</div>
 					</div>
 				</div>				
 				<div class="widget select-color">
 					<div class="title">Clientes</div>
-                        <el-input
+                        <!-- <el-input
                             placeholder="buscar"
                             prefix-icon="el-icon-search"
                             size="mini"
                             v-model="filterText">  
-                        </el-input>                     
+                        </el-input>                      -->
 					<div class="content">                     
 						<el-checkbox :indeterminate="isIndeterminateCustomer" v-model="checkAllCustomers" @change="handleCheckAllCustomersChange">Marcar todos</el-checkbox>                        
 						<div style="margin: 15px 0;"></div>
@@ -46,7 +48,7 @@
 						</el-checkbox-group>
 					</div>
 				</div>
-				<div class="widget select-color">
+				<!-- <div class="widget select-color">
 					<div class="title">Conceptos</div>
                       <el-input
                             placeholder="buscar"
@@ -61,7 +63,7 @@
 							<el-checkbox v-for="b in concepts" :label="b.id" :key="b.id">{{b.description}}</el-checkbox>
 						</el-checkbox-group>
 					</div>
-				</div>	
+				</div>	 -->
 				<div class="widget close-filter-box">
 					<button @click="sidebarOpen = false">
 						close filter
@@ -74,7 +76,7 @@
 	   		<vue-scroll class="table-box card-base card-outline">
 				<table class="styled striped hover">
 					<tbody>										
-						<tr v-for="cliente in novelties" :key="cliente.customerId">
+						<tr v-for="cliente in noveltiesFilter" :key="cliente.customerId">
 							<el-row :gutter="20" >
 								<el-col :span="22" :offset="1">
 									<h3 class="bg-accent-lighter b-rad-14" style="padding: 8px;">
@@ -97,7 +99,8 @@
 													v-model="tarifa.price" 
 													:precision="2" 
 													:controls="false"
-													:min="0">
+													:min="0"
+													:disabled="noveltyDisabled(tarifa) ">
 												</el-input-number>
 											</div>
 										</div>												
@@ -107,7 +110,8 @@
 										<el-switch
 											v-model="tarifa.noveltyEnabled"
 											active-color="#13ce66"
-											inactive-color="#ff4949">
+											inactive-color="#ff4949"
+											:disabled="tarifa.hasPaidPartial">
 										</el-switch>
 									</el-col>
 								</el-row>
@@ -117,6 +121,7 @@
 				</table>
 			</vue-scroll> 
 
+       		<el-button v-if="noveltiesFilter!=null" type="primary" v-on:click="save">GUARDAR</el-button>
 
 		</div>	
 	</div>
@@ -124,9 +129,9 @@
 
 <script>
 import 'tui-grid/dist/tui-grid.min.css'
-import Chance from 'chance'
 import axios from 'axios'
-const chance = new Chance()
+import { Loading } from 'element-ui';
+
 export default {
 	name: 'Novelties',
 	data () {
@@ -151,39 +156,53 @@ export default {
 			modelo: null,
 			novelties: null,
             filterText: null,
-			month: '02',
-			year: '2021'
+			month: new Date().getMonth()+1,
+			year: new Date().getFullYear()
 		}
 	},
 	computed: {
-		noveltiesFilter: function() {
+		noveltiesFilter: function() {			
 		let cliente = null;
 		let concepto = null;
+		if (this.novelties == null)
+			return;
+
 		if (this.searchCustomer!=null)
 		{
-			cliente=searchCustomer.toUpperCase();
+			cliente=this.searchCustomer.toUpperCase();
 		}
 		if (this.searchConcept!=null)
 		{
 			concepto=this.searchConcept.toUpperCase();
 		}		
-		debugger
-		return this.novelties.filter(			
+		return this.novelties.filter(				
 			x => { 
-				return (x.customerName.toUpperCase().includes(cliente) || cliente==null) 
-				 && (x.name.toUpperCase().includes(concepto) || concepto==null)
-				&& (this.checkedCustomers.length==0 || this.checkedCustomers.includes(x.customerId) )
-                && (this.checkedConcepts.length==0 || this.checkedConcepts.includes(x.conceptId) )
+				return (x.customerName.includes(cliente) || cliente==null) 		
+				&& (this.checkedCustomers.length==0 || this.checkedCustomers.includes(x.customerId))
+			//	&& (x.novelties.concepts.includes(concepto) || concepto==null)
+			// x => { 
+			// 	return (x.customerName.includes(cliente) || cliente==null) 
+			// 	 && (x.name.includes(concepto) || concepto==null)
+			// 	&& (this.checkedCustomers.length==0 || this.checkedCustomers.includes(x.customerId) )
+            //     && (this.checkedConcepts.length==0 || this.checkedConcepts.includes(x.conceptId) )
 
 			})			
-		},
+		}
 	},
 	methods: {
 
 		filterTag(value, row) {
 			return row.tag === value;
 		},	
-				
+		noveltyDisabled(tarifa) {	
+			if (tarifa.hasPaidPartial)
+				return tarifa.hasPaidPartial;		
+
+			if (!tarifa.noveltyEnabled)
+				return true;
+			else
+				return false;
+		},				
 		getNovelties() {
 			let me = this;
 			let url = me.URL_GET_NOVELTIES;
@@ -222,7 +241,72 @@ export default {
 			me.showError();
 			});
 		}, 		
-							
+
+		save(){	
+		  let me = this;	  		  	  
+		  let lista = '';
+		  
+		  this.$confirm('¿Desea guardar los datos?', 'Atención', {
+			confirmButtonText: 'OK',
+			cancelButtonText: 'Cancelar',
+			type: 'warning',
+			center: true
+			}
+			).then(() => {
+				let loadingInstance  = Loading.service({ fullscreen: true });
+				try {			
+					
+					lista = {
+						'CompanyId': me.companyId,
+						'SecurityUserId': me.userId,
+						'Year': parseInt( me.year),
+						'Month': parseInt( me.month),	
+						'Novelties': []
+					}
+
+					me.novelties.forEach(customers=> {
+						customers.novelties.forEach(novelty => {
+							let objeto = [];
+							if (novelty.tariffEnabled) {								
+									objeto =  {
+									'TariffId': novelty.tariffId,
+									'Price':novelty.price,
+									'Enabled':novelty.noveltyEnabled,
+								}
+								lista.Novelties.push(objeto);
+							} 
+
+						});
+						
+					});											
+
+					axios.post(this.URL_CREATE_NOVELTIES,
+					lista
+					).then(function(response){
+						loadingInstance.close();
+						me.showOk();
+						
+						
+					}).catch(function(error){
+						loadingInstance.close();
+						me.showError(error);
+					});
+				} catch (error) {
+					loadingInstance.close();
+					me.showError(error);
+				}
+	
+				}).catch(() => {
+					loadingInstance.close();
+				this.$message({
+					type: 'info',
+					message: 'Cancelado'
+				});
+
+			});
+		
+			
+		},									
 		//CHECKBOX -INI
       handleCheckAllCustomersChange(val) {
 	
@@ -257,6 +341,10 @@ export default {
         let checkedCount = value.length;
         this.checkAllConcepts = checkedCount === this.concepts.length;
         this.isIndeterminateConcepts = checkedCount > 0 && checkedCount < this.brands.length;
+	  },
+
+	  handleChangeDate() {
+		  this.getNovelties();
 	  }
 	  
 	},
@@ -265,7 +353,9 @@ export default {
 				this.URL_GET_NOVELTIES= this.$route.meta.URL_GET_NOVELTIES;	
 				this.URL_GET_CUSTOMERS = this.$route.meta.URL_GET_CUSTOMERS;
 				this.URL_GET_CONCEPTS = this.$route.meta.URL_GET_CONCEPTS;
+				this.URL_CREATE_NOVELTIES = this.$route.meta.URL_CREATE_NOVELTIES;
 				this.companyId = parseInt( this.$store.getters.user.CompanyId);
+				this.userId =  parseInt( this.$store.getters.user.Id);
 				this.modelo = this.$route.meta.modelo;
 				this.getCustomers();
 				this.getConcepts();
@@ -292,6 +382,11 @@ export default {
 
 .color-concept {
 	color: currentColor;
+}
+
+.cliente-concepto {
+    margin-top: 55px;
+    padding-top: 10px;
 }
 
 .el-input-number.is-without-controls .el-input__inner {

@@ -68,18 +68,12 @@ export default {
 				tags: ['parametrizacion'],	
 				URL_GET: 'api/SystemCustoms/',
 				URL_UPDATE: 'api/SystemCustoms/Update',
-				URL_GET_CUSTOMERS: 'api/Customers/',
 				URL_GET_VOUCHER_TYPE: 'api/VoucherTypes/',
-				URL_GET_DELIVERY_TYPE: 'api/DeliveryTypes/',
-				URL_GET_DELIVERY_TURN: 'api/DeliveryTurns/',
 				URL_GET_PAYMENT_METHODS: 'api/PaymentMethods/',		
 				modelo: {
 					id: null,
 					companyId: null,
-					deliveryTurnId: null,
-					customerId: null,
 					voucherType: null,
-					deliveryTypeId: null,
 					paymentMethodId: null						
 				}					
 			}

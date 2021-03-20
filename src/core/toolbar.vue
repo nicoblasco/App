@@ -16,23 +16,23 @@
 				</span>
 				<el-dropdown-menu slot="dropdown">
 					<el-dropdown-item command="es"><i class="flag-icon flag-icon-ar mr-15"></i>Spanish</el-dropdown-item>
-					<el-dropdown-item command="us"><i class="flag-icon flag-icon-us mr-15"></i>English</el-dropdown-item>
+					<!-- <el-dropdown-item command="us"><i class="flag-icon flag-icon-us mr-15"></i>English</el-dropdown-item> -->
 				</el-dropdown-menu>
 			</el-dropdown>
 			<button class="fullscreen-button" @click="toggleFullscreen">
 				<i class="mdi mdi-fullscreen" v-if="!fullscreen"></i>
 				<i class="mdi mdi-fullscreen-exit" v-if="fullscreen"></i>
 			</button>
-			<el-popover ref="popover" placement="bottom" :width="popoverWidth" trigger="click">
+			<!-- <el-popover ref="popover" placement="bottom" :width="popoverWidth" trigger="click">
 				<notification-box></notification-box>
 			</el-popover>
 			<el-badge :is-dot="true" class="notification-icon-badge">
 				<el-button v-popover:popover icon="mdi mdi-bell" class="notification-icon"></el-button>
-			</el-badge>
-			<span class="username"><router-link to="/profile">Nicolás Blasco</router-link></span>
+			</el-badge> -->
+			<span class="username"><router-link to="/profile">{{username}}</router-link></span>
 			<el-dropdown trigger="click" @command="onCommand">
 				<span class="el-dropdown-link">
-					<img src="../assets/images/avatar.jpg" class="avatar" alt="avatar">
+					<img src="../assets/images/avatar-2.jpg" class="avatar" alt="avatar">
 				</span>
 				<el-dropdown-menu slot="dropdown">
 					<el-dropdown-item command="/profile"><i class="mdi mdi-account mr-10"></i> Perfil</el-dropdown-item>
@@ -56,11 +56,25 @@ export default {
 	props: ['menuBurger'],
 	data() {
 		return {
+			username: null,
+			companyId: null,
+			user: null,
 			popoverWidth: 300,
 			fullscreen: false,
 			lang: 'ar'
 		}
 	},
+	 created () {			
+			try {				
+				this.companyId = parseInt( this.$store.getters.user.CompanyId);
+				this.user = this.username = this.$store.getters.user;
+				this.username = this.$store.getters.user.Nombre;
+			} catch (error) {
+				this.showError(error);
+			}
+
+
+        }, 	
 	methods: {
 		onCommandLang(lang) {
 			if(lang.charAt(0) === '/')

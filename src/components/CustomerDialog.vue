@@ -229,7 +229,7 @@ export default {
 	}
 
 	.bottom {
-		bottom: 5%;
+		bottom: 0%;
     	position: absolute;
 	}
 

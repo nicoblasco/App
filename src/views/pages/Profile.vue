@@ -5,13 +5,13 @@
 			<!--<div class="username" v-affix="{parentid: 'affix-container', boundaryid: '', delay:600, offset:0, enable:() => affixEnabled}">-->
 			<div class="username">
 				<div class="cover-small"></div>
-				<div class="avatar-small"><img src="@/assets/images/avatar.jpg" alt="avatar"></div>
+				<div class="avatar-small"><img src="@/assets/images/avatar-2.jpg" alt="avatar"></div>
 				<span>{{username}}</span>
 				<div class="colors-box">
 					<div v-for="i in 5" :key="i" :class="{'color':true, 'active':colorActive}" :style="{'background':color}"></div>
 				</div>
 			</div>
-			<div class="avatar"><img src="@/assets/images/avatar.jpg" alt="avatar"></div>
+			<div class="avatar"><img src="@/assets/images/avatar-2.jpg" alt="avatar"></div>
 			<img src="@/assets/images/cover-2.jpg" id="color-thief" class="color-thief" alt="profile cover">
 		</div>
 	</vue-scroll>
@@ -25,12 +25,25 @@ export default {
 	name: 'Profile',
 	data() {
 		return {
-			username: 'Nicolás Blasco',
+			username: null,
+			companyId: null,
+			user: null,
 			colorActive: false,
 			color: 'white',
 			affixEnabled: true
 		}
 	},
+	        created () {			
+			try {				
+				this.companyId = parseInt( this.$store.getters.user.CompanyId);
+				this.user = this.username = this.$store.getters.user;
+				this.username = this.$store.getters.user.Nombre;
+			} catch (error) {
+				this.showError(error);
+			}
+
+
+        }, 
 	methods: {
 		resizeAffixEnabled() {
 			if(window.innerWidth <= 768) {

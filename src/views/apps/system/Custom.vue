@@ -3,27 +3,9 @@
         <el-form :inline="true" :model="modelo" class="demo-form-inline">        		
             <div class="widget shipping card-shadow--small b-rad-4">
                 <div class="title">
-                    Configuracion de Venta rápida
+                    Configuracion de Sistema
                 </div>
                 <div class="content">                    
-					<el-row>
-						<el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="10">	
-							<div class="flex justify-space-between margen-top-10 label-arriba margen-boton-25-less">					
-								<el-form-item label="Cliente predeterminado">
-								<el-select 
-									v-model="modelo.customerId" 
-									size="mini"
-                                    clearable 
-									placeholder="Seleccione" 
-									filterable
-									:no-match-text="datoNoEncontrado"
-									:no-data-text= "noHayDatos">
-									<el-option v-for="item in customers" :key="item.id" :label="item.names" :value="item.id"></el-option>
-								</el-select>
-								</el-form-item>
-							</div>
-						</el-col>					
-					</el-row>	
 					<el-row>
 						<el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="10">	
 							<div class="flex justify-space-between margen-top-10 label-arriba margen-boton-25-less">					
@@ -46,7 +28,7 @@
 					<el-row>
 						<el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="10">	
 							<div class="flex justify-space-between margen-top-10 label-arriba margen-boton-25-less">					
-								<el-form-item label="Condición de pago predeterminada">
+								<el-form-item label="Metodo de pago predeterminada">
 								<el-select 
 									v-model="modelo.paymentMethodId" 
 									size="mini"
@@ -56,42 +38,6 @@
 									:no-match-text="datoNoEncontrado"
 									:no-data-text= "noHayDatos">
 									<el-option v-for="(i, index) in paymentMethods" :key="index" :label="i.description" :value="i.id"></el-option>
-								</el-select>
-								</el-form-item>
-							</div>
-						</el-col>					
-					</el-row>	
-					<el-row>
-						<el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="10">	
-							<div class="flex justify-space-between margen-top-10 label-arriba margen-boton-25-less">					
-								<el-form-item label="Tipo de entrega predeterminado">
-								<el-select 
-									v-model="modelo.deliveryTypeId" 
-									size="mini"
-                                    clearable 
-									placeholder="Seleccione" 
-									filterable
-									:no-match-text="datoNoEncontrado"
-									:no-data-text= "noHayDatos">
-									<el-option v-for="(i, index) in deliveryTypes" :key="index" :label="i.description" :value="i.id"></el-option>
-								</el-select>
-								</el-form-item>
-							</div>
-						</el-col>					
-					</el-row>	
-					<el-row>
-						<el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="10">	
-							<div class="flex justify-space-between margen-top-10 label-arriba margen-boton-25-less">					
-								<el-form-item label="Turno de entrega predeterminado">
-								<el-select 
-									v-model="modelo.deliveryTurnId" 
-									size="mini"
-                                    clearable 
-									placeholder="Seleccione" 
-									filterable
-									:no-match-text="datoNoEncontrado"
-									:no-data-text= "noHayDatos">
-									<el-option v-for="(i, index) in deliveryTurns" :key="index" :label="i.description" :value="i.id"></el-option>
 								</el-select>
 								</el-form-item>
 							</div>
@@ -116,11 +62,7 @@ export default {
 	data () {
 		return {
 			modelo: null,
-			customers: null,
 			voucherTypes: null,
-			deliveryTypes: null,
-			priceLists: null,
-			deliveryTurns: null,
 			paymentMethods: null,
 			search: '',
 			datoNoEncontrado: "Dato no encontrado",
@@ -136,37 +78,10 @@ export default {
 			  me[lista]=response.data;
 			})
 			.catch(function(error) {
+				debugger
 				me.showError();
-			});
-        },
-    getConfiguration(id){
-        let me = this;
-        axios
-            .get(this.URL_GET + '/'+id)
-            .then(function(response) {
-            me.modelo.name = response.data.name;
-            me.company.contactName =response.data.contactName;
-            me.company.contactLastName =response.data.contactLastName;
-            me.company.initialDate =response.data.initialDate;
-            me.company.email =response.data.email;
-            me.company.phone =response.data.phone;
-            me.company.website =response.data.website;
-            me.company.address =response.data.address;
-            me.company.postal =response.data.postal;
-            me.company.city =response.data.city;
-            me.company.state =response.data.state;
-            me.company.country =response.data.country;
-            me.company.schedule =response.data.schedule;
-            me.company.comment =response.data.comment;
-            me.company.logo =response.data.logo;
-            me.company.logoName= response.data.logoName;
-            me.company.id =id;
-            me.company.sectors= response.data.sectors
-            })
-            .catch(function(error) {
-            me.showError();
-            });
-        },        
+			});   
+	 }, 
         save()
         {
            let loadingInstance  = Loading.service({ fullscreen: true });
@@ -205,24 +120,16 @@ export default {
           loadingInstance.close();
           me.showError();
         });  
-	},
-	created() {
-		this.modelo = this.$route.meta.modelo;
+	}
+  },
+	created() {		
 		this.companyId = parseInt( this.$store.getters.user.CompanyId);
 		this.modelo = this.$route.meta.modelo;
-		this.URL_GET_CUSTOMERS= this.$route.meta.URL_GET_CUSTOMERS;
 		this.URL_GET_VOUCHER_TYPE= this.$route.meta.URL_GET_VOUCHER_TYPE;
-		this.URL_GET_DELIVERY_TYPE= this.$route.meta.URL_GET_DELIVERY_TYPE;
-		this.URL_GET_DELIVERY_TURN= this.$route.meta.URL_GET_DELIVERY_TURN;
         this.URL_GET_PAYMENT_METHODS= this.$route.meta.URL_GET_PAYMENT_METHODS;
-        this.getConfiguration(this.companyId);
-		this.getLista('customers',this.URL_GET_CUSTOMERS);
 		this.getLista('voucherTypes',this.URL_GET_VOUCHER_TYPE);
-		this.getLista('deliveryTypes',this.URL_GET_DELIVERY_TYPE);
-		this.getLista('deliveryTurns',this.URL_GET_DELIVERY_TURN);
 		this.getLista('paymentMethods',this.URL_GET_PAYMENT_METHODS);
-    }
-  }
+    }  
 }
 </script>
 

@@ -4,6 +4,7 @@ import Router from 'vue-router'
 //apps
 import Dashboard from '../views/apps/Dashboard.vue'
 import Admin from '../router/admin'
+import Report from '../router/report'
 import Tipification from '../router/typifications'
 import System from '../router/system'
 import Product from '../router/product'
@@ -16,6 +17,7 @@ import NotFound from '../views/pages/NotFound.vue'
 import Provider from '../views/pages/Provider.vue'
 import Customer from '../views/pages/Customer.vue'
 import Novelty from '../views/pages/Novelty.vue'
+import Payment from '../views/pages/Payment.vue'
 
 import Vehicles from '../views/pages/Vehicles.vue'
 import Devices from '../views/pages/Devices.vue'
@@ -75,6 +77,7 @@ const router = new Router({
 				URL_GET_CUSTOMERS: 'api/Customers/',
 				URL_GET_CONCEPTS: 'api/Concepts/',
 				URL_GET_NOVELTIES: 'api/Novelties/',
+				URL_CREATE_NOVELTIES: 'api/Novelties/PostNovelties',
 				modelo: {
 					id: null,
 					customerId: null,
@@ -83,6 +86,33 @@ const router = new Router({
 					month: null,
 					price: null,
 					enabled: null		
+				}
+					
+			} 
+		},			
+		{
+			path: '/payment',
+			name: 'payment',
+			component: Payment,
+			meta: {
+				auth: true,
+				layout: layouts.navLeft,		
+				searchable: true,		
+				URL_GET: 'api/Novelties/',
+				URL_GET_CUSTOMERS: 'api/Customers/',
+				URL_GET_NOVELTIES: 'api/Novelties/GetNoveltiesForPayment',
+				URL_CREATE_PAYMENT: 'api/Payments/Create',
+				URL_GET_PAYMENTMETHODS: 'api/PaymentMethods/',
+				URL_GET_SYSTEMCUSTOM: 'api/SystemCustoms/',
+				modelo: {
+					id: null,
+					customerId: null,
+					conceptId: null,
+					year: null,
+					month: null,
+					price: null,
+					enabled: null,
+					paymentMethodId: null		
 				}
 					
 			} 
@@ -161,6 +191,7 @@ const router = new Router({
 			}
 		},
 		Admin,
+		Report,
 		Tipification,
 		System,
 		Product,

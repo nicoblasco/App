@@ -2,7 +2,7 @@
 	<div class="box-logo flex align-center" :class="{'nav-collapsed':collapseNav, [mode]:true}">
 		<!--<div class="letter-logo">P</div>-->
 		<img class="image-logo" src="@/assets/images/logosale.svg" alt="logo"/>
-		<div class="app-name" @click="goto('/')">GB-Sales</div>
+		<div class="app-name" @click="goto('/')">BINDER!</div>
 		<button class="collapse-nav" @click="collapseNavToggle">
 			<i class="mdi mdi-menu"></i>
 		</button>
