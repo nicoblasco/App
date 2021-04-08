@@ -299,15 +299,16 @@ export default {
 		   let me = this;	  		  	  
 		   let lista = '';
 		  
-		   this.$confirm('¿Desea registrar el pago?', 'Atención', {
+		   this.$prompt('¿Desea registrar el pago?. A continuación podra grabar un comentario', 'Atención', {
 		 	confirmButtonText: 'OK',
 		 	cancelButtonText: 'Cancelar',
 		 	type: 'warning',
 		 	center: true
 		 	}
-		 	).then(() => {
+		 	).then(({ value }) => {
 		 		let loadingInstance  = Loading.service({ fullscreen: true });
 		 		try {			
+					me.observation = value;
 		 			lista = {
 		 				'PaymentMethodId': me.paymentMethod,
 		 				'Total': me.total,
@@ -373,7 +374,8 @@ export default {
 			var heading= [
 			"Fecha: " + new Date().toLocaleString(),
 			"Medio de Pago: " + this.paymentMethodDescription,
-			"Total: $" + this.total			
+			"Total: $" + this.total,
+			"Observación: " + this.observation			
 		];
 			const columns = [
 				{ title: "Concepto", dataKey: "concept" },

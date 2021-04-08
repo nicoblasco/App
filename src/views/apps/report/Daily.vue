@@ -12,17 +12,17 @@
                             <div class="mb-15"><i class="mdi mdi-calendar-multiple-check mr-10"></i>
                                 <el-date-picker
                                     v-model="rangoFechas"
-                                    type="daterange"
+                                    type="datetimerange"
                                     align="right"
                                     size="small"
                                     unlink-panels
                                     range-separator="A"
-                                    start-placeholder="Fecha desde"
+                                    start-placeholder="Fecha Desde"
                                     end-placeholder="Fecha Hasta"
                                     @change="handleChangeDate"
                                     :picker-options="pickerOptions">
                                 </el-date-picker>
-                            </div>
+                            </div>                         
                             <div class="mb-15"><i class="mdi mdi-cash-multiple mr-10"></i>$ {{totalCalculado}}                                
                             </div>
                             <div>
@@ -117,7 +117,12 @@
 
                                 <label class="header 2 primary-text pr-70 titulo" >TOTAL: </label> 
                                 <span class="bold">$ {{totalFacturaCalculado}}</span>
-                            </el-row>			
+                            </el-row>	
+                             <el-row :gutter="20">
+
+                                <label class="header 2 primary-text pr-70 titulo" >Observación: </label> 
+                                <span class="bold"> {{modelo.observation}}</span>
+                            </el-row>	                            		
 						</div>
 						
 
@@ -434,6 +439,7 @@ export default {
 			let url = me.URL_GET_PAYMENT;
             let startDate = me.rangoFechas[0];
             let endDate = me.rangoFechas[1];
+                
 			axios.get(url, {
 				//Siempre va el atributos params
 				params: {

@@ -1,6 +1,6 @@
 <template>
 	<vue-scroll class="page-custom">
-        <el-form :inline="true" :model="modelo" class="demo-form-inline">        		
+        <el-form :inline="true" :model="modelo" ref="modelo" class="demo-form-inline">        		
             <div class="widget shipping card-shadow--small b-rad-4">
                 <div class="title">
                     Configuracion de Sistema
@@ -11,7 +11,7 @@
 							<div class="flex justify-space-between margen-top-10 label-arriba margen-boton-25-less">					
 								<el-form-item label="Tipo de Comprobante predeterminado">
 								<el-select 
-									v-model="modelo.voucherType" 
+									v-model="modelo.voucherTypeId" 
 									size="mini"
                                     clearable 
 									placeholder="Seleccione" 
@@ -57,13 +57,15 @@ import moment from 'moment'
 import Chance from 'chance'
 const chance = new Chance()
 import axios from 'axios'
+import { Loading } from 'element-ui';
 export default {
 	name: 'SystemCustom',
 	data () {
 		return {
 			modelo: null,
-			voucherTypes: null,
+			companyId: null,
 			paymentMethods: null,
+			voucherTypes: null,
 			search: '',
 			datoNoEncontrado: "Dato no encontrado",
 			noHayDatos: "No hay datos"           
@@ -82,53 +84,59 @@ export default {
 				me.showError();
 			});   
 	 }, 
-        save()
-        {
-           let loadingInstance  = Loading.service({ fullscreen: true });
-            let me = this;
-            let objeto = {
-            Id: id,
-            Name: me.company.name,
-            ContactName: me.company.contactName,
-            ContactLastName: me.company.contactLastName,
-            InitialDate: me.company.initialDate,
-            Email: me.company.email,
-            Phone: me.company.phone,
-            Website: me.company.website,
-            Address: me.company.address,
-            Postal: me.company.postal,
-            City: me.company.city,
-            State: me.company.state,
-            Country: me.company.country,
-            Schedule: me.company.schedule,
-            Logo: me.company.logo,
-            LogoName: me.company.logoName,
-            Comment: me.company.comment,
-            ConfigScreens: [],
-            SecurityRoles:[],
-            CompanySectors: []
-            }
-         axios.post(this.URL_UPDATE_COMPANY, objeto)
+    get() {
+      let me = this;
+      axios
+        .get(this.URL_GET+ parseInt(me.companyId))
         .then(function(response) {
-          me.isOk = true;
-          loadingInstance.close();
-          me.avanzarStep();
-          me.company.password= response.data;
+			if (!response.data== null) {
+				me.modelo = response.data;
+			}
+          		
         })
         .catch(function(error) {
-          me.isOk = false;
-          loadingInstance.close();
           me.showError();
-        });  
+        });
+    },	 
+        save()
+        {
+			let loadingInstance  = Loading.service({ fullscreen: true });
+			try {				
+				let me = this;
+
+				axios.put(this.URL_UPDATE, {
+					'Id': me.modelo.id,
+					'CompanyId': parseInt(me.companyId),
+					'VoucherTypeId': me.modelo.voucherTypeId,
+					'PaymentMethodId':  me.modelo.paymentMethodId
+					})
+				.then(function(response) {
+				me.modelo.id = response.data.id;
+				loadingInstance.close();
+				me.showOk();
+				})
+				.catch(function(error) {
+				loadingInstance.close();
+				me.showError();
+				});  
+			} catch (error) {
+				loadingInstance.close();
+				me.showError();
+			}
+
 	}
   },
 	created() {		
 		this.companyId = parseInt( this.$store.getters.user.CompanyId);
 		this.modelo = this.$route.meta.modelo;
+		this.companyId = parseInt( this.$store.getters.user.CompanyId);
 		this.URL_GET_VOUCHER_TYPE= this.$route.meta.URL_GET_VOUCHER_TYPE;
+		this.URL_GET= this.$route.meta.URL_GET;
+		this.URL_UPDATE= this.$route.meta.URL_UPDATE;
         this.URL_GET_PAYMENT_METHODS= this.$route.meta.URL_GET_PAYMENT_METHODS;
 		this.getLista('voucherTypes',this.URL_GET_VOUCHER_TYPE);
 		this.getLista('paymentMethods',this.URL_GET_PAYMENT_METHODS);
+		this.get();
     }  
 }
 </script>

@@ -755,6 +755,7 @@ export default {
     updateCompany(id){      
       let loadingInstance  = Loading.service({ fullscreen: true });
       let me = this;
+      debugger
       let objeto = {
        Id: id,
        Name: me.company.name,
@@ -865,7 +866,7 @@ export default {
       objeto.SecurityRoles.push(objRol);  
       });
 
-
+      debugger
       axios.post(this.URL_UPDATE_COMPANY, objeto)
         .then(function(response) {
           me.isOk = true;
@@ -882,6 +883,7 @@ export default {
     saveCompany() {
       let loadingInstance  = Loading.service({ fullscreen: true });
       let me = this;
+
       let objeto = {
        Name: me.company.name,
        ContactName: me.company.contactName,

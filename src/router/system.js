@@ -73,7 +73,7 @@ export default {
 				modelo: {
 					id: null,
 					companyId: null,
-					voucherType: null,
+					voucherTypeId: null,
 					paymentMethodId: null						
 				}					
 			}

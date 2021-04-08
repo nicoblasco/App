@@ -50,17 +50,32 @@
 							</el-cascader>								
 						</el-form-item> 	
 						<el-form-item label="Telefono">
-							<el-col :span="10">
+							<el-col :span="9">
 								<el-input v-model="data.phone"></el-input>					
 							</el-col>
-							<el-col class="label2" :span="3"> Email </el-col>
+							<el-col class="label2" :span="4"> Email </el-col>
 							<el-col :span="11">
 								<el-input  v-model="data.email"></el-input>					
 							</el-col>
 						</el-form-item>				
 						<el-form-item label="Clave Fiscal">
-							<el-input  v-model="data.keyFiscal"></el-input>					
-						</el-form-item> 				  							
+							<el-col :span="9">
+								<el-input v-model="data.keyFiscal"></el-input>					
+							</el-col>
+							<el-col class="label2" :span="4"> Arba </el-col>
+							<el-col :span="11">
+								<el-input  v-model="data.keyArba"></el-input>					
+							</el-col>				
+						</el-form-item> 
+						<el-form-item label="Legajo Munic.">
+							<el-col :span="9">
+								<el-input v-model="data.legajoMunicipal"></el-input>					
+							</el-col>
+							<el-col class="label2" :span="4"> Clave </el-col>
+							<el-col :span="11">
+								<el-input  v-model="data.keyMunicipal"></el-input>					
+							</el-col>
+						</el-form-item>										  							
 						<el-form-item label="Observaciones">
 							<el-input
 								type="textarea"
@@ -231,6 +246,7 @@ export default {
 	.bottom {
 		bottom: 0%;
     	position: absolute;
+		margin-bottom: 0px!important;
 	}
 
 	.avatar-box {
