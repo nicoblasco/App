@@ -26,6 +26,7 @@ export default {
 				URL_CREATE_PAYMENT: 'api/Payments/CreatePayment',	
 				URL_GET_PAYMENTMETHODS: 'api/PaymentMethods/',		
 				URL_GET_SYSTEMCUSTOM: 'api/SystemCustoms/',	
+				URL_GET_COMPANY: 'api/Companies/',
 				modelo: {
 					id: '',
 					conceptName: '',					
@@ -43,11 +44,11 @@ export default {
 						tdClass: 'text-center',
 						width: '50px',
 						filterable: true
-					},
+					},				
 					{
 						label: 'Año',
 						field: 'year',
-						type: 'text',
+						type: 'number',
 						tdClass: 'text-left',
 						width: '50px',
 						filterable: true
@@ -55,7 +56,7 @@ export default {
 					{
 						label: 'Mes',
 						field: 'month',
-						type: 'text',
+						type: 'number',
 						tdClass: 'text-left',
 						width: '50px',
 						filterable: true
@@ -71,7 +72,7 @@ export default {
 					{
 						label: 'Valor',
 						field: 'price',
-						type: 'text',
+						type: 'number',
 						tdClass: 'text-left',
 						width: '50px',
 						filterable: false
@@ -79,7 +80,7 @@ export default {
 					{
 						label: 'Adeuda',
 						field: 'remainder',
-						type: 'text',
+						type: 'number',
 						tdClass: 'text-left',
 						width: '50px',
 						filterable: false
@@ -103,7 +104,9 @@ export default {
 				layout: layouts.navSystem,
 				searchable: true,
                 URL_GET_CUSTOMERS: 'api/Customers/',
+				URL_GET_CUSTOMER: 'api/Customers/GetCustomer/',
 				URL_GET_PAYMENT: 'api/Payments/',
+				URL_GET_COMPANY: 'api/Companies/',
                 URL_GET_PAYMENTMETHODS: 'api/PaymentMethods/',
 				URL_UPDATE_PAYMENT: 'api/Payments/Update',
 				URL_DELETE: 'api/Payments/Delete/',	
@@ -128,7 +131,15 @@ export default {
 						tdClass: 'text-left',
 						width: '150px',
 						filterable: false
-					},					
+					},	
+					{
+						label: 'Factura',
+						field: 'invoice',
+						type: 'text',
+						tdClass: 'text-left',
+						width: '50px',
+						filterable: true
+					},										
 					{
 						label: 'Cliente',
 						field: 'customerName',
@@ -147,7 +158,7 @@ export default {
 					{
 						label: 'Total',
 						field: 'total',
-						type: 'text',
+						type: 'number',
 						tdClass: 'text-left',
 						width: '70px',
 						filterable: false

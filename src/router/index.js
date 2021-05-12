@@ -62,6 +62,7 @@ const router = new Router({
 				URL_DELETE: 'api/Customers/Delete',	
 				URL_GET_DOCUMENT_TYPE: 'api/DocumentTypes/',
 				URL_GET_TARIFFS: 'api/Tariffs/',
+				URL_GET_DOCUMENTATIONS: 'api/CustomerDocumentations/',
 				URL_CITIES: 'api/Countries/GetFull/'
 			}
 		},	
@@ -100,10 +101,12 @@ const router = new Router({
 				searchable: true,		
 				URL_GET: 'api/Novelties/',
 				URL_GET_CUSTOMERS: 'api/Customers/',
+				URL_GET_CUSTOMER: 'api/Customers/GetCustomer/',
 				URL_GET_NOVELTIES: 'api/Novelties/GetNoveltiesForPayment',
 				URL_CREATE_PAYMENT: 'api/Payments/Create',
 				URL_GET_PAYMENTMETHODS: 'api/PaymentMethods/',
 				URL_GET_SYSTEMCUSTOM: 'api/SystemCustoms/',
+				URL_GET_COMPANY: 'api/Companies/',
 				modelo: {
 					id: null,
 					customerId: null,

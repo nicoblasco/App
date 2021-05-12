@@ -32,7 +32,8 @@
 			<span class="username"><router-link to="/profile">{{username}}</router-link></span>
 			<el-dropdown trigger="click" @command="onCommand">
 				<span class="el-dropdown-link">
-					<img src="../assets/images/avatar-2.jpg" class="avatar" alt="avatar">
+					<!-- <img src="../assets/images/avatar-2.jpg" class="avatar" alt="avatar"> -->
+					<img :src="this.logo ? this.logo :  '@/assets/images/avatar-2.jpg'" class="avatar"  alt="avatar">
 				</span>
 				<el-dropdown-menu slot="dropdown">
 					<el-dropdown-item command="/profile"><i class="mdi mdi-account mr-10"></i> Perfil</el-dropdown-item>
@@ -58,6 +59,7 @@ export default {
 		return {
 			username: null,
 			companyId: null,
+			logo: null,
 			user: null,
 			popoverWidth: 300,
 			fullscreen: false,
@@ -69,6 +71,7 @@ export default {
 				this.companyId = parseInt( this.$store.getters.user.CompanyId);
 				this.user = this.username = this.$store.getters.user;
 				this.username = this.$store.getters.user.Nombre;
+				this.logo = this.$store.getters.user.Logo;
 			} catch (error) {
 				this.showError(error);
 			}

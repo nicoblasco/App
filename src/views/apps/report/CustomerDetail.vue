@@ -109,6 +109,7 @@
 
 		<el-dialog  :title=formTitle  :visible.sync="dialogFormVisible">
 			<el-form :model="modelo" ref="modelo"  label-width="260px">
+				<!-- Tabla Principal -->
 				<table class="styled striped hover">
 					<tbody>	
 						<el-row :gutter="20" v-if="!modelo.paid">	
@@ -140,11 +141,11 @@
 										<span>IMPORTE</span>
 									</div>												
 								</el-col>	
-								<!-- <el-col :span="1" :offset="2">
+								<el-col :span="1" :offset="2">
 									<div class="item-box item-product">
-										<span>PENDIENTE</span>
+										<span>ADEUDA</span>
 									</div>												
-								</el-col> -->
+								</el-col>
 								<el-col :span="1" :offset="3">
 									<div class="item-box item-product">
 										<span>PAGA</span>
@@ -171,13 +172,12 @@
 								<div class="item-box item-product">
 									<h4 class="color-concept">{{modelo.price}}</h4>
 								</div>												
-							</el-col>	
-							<!-- <el-col :span="1" :offset="2">
-								<div class="item-box item-product">									
-									<h4 v-if="modelo.paid" class="color-concept">{{modelo.price - modelo.amount}}</h4>
-									<h4 v-else class="color-concept">{{modelo.remainder - modelo.amount}}</h4>
+							</el-col>
+							<el-col :span="1" :offset="2">
+								<div class="item-box item-product">
+									<h4 class="color-concept">{{modelo.remainder}}</h4>
 								</div>												
-							</el-col>																																																	 -->
+							</el-col>							
 							<el-col :span="1" :offset="2">
 								<div class="item-box item-product">
 									<div>												
@@ -205,7 +205,39 @@
 							</el-col>							
 						</el-row>
 					</tbody>
-				</table>                                                    													
+				</table>    
+				<!-- /**Tabla Detalle */-->
+				<el-collapse accordion>
+					<el-collapse-item title="Pagos parciales" name="1">
+						<el-table
+							:data="modelo.details"
+							border
+							height="200"
+							:summary-method="getSummaries"
+							show-summary							
+							style="width: 70%">
+							<el-table-column
+							fixed
+							prop="paymentDate"
+							label="Fecha"
+							width="180">
+							</el-table-column>
+							<el-table-column
+							prop="invoice"
+							label="Factura"
+							width="180">
+							</el-table-column>
+							<el-table-column
+							prop="paymentMethod"
+							label="Metodo de Pago">
+							</el-table-column>
+							<el-table-column
+							prop="amount"
+							label="Precio">
+							</el-table-column>					
+						</el-table>
+					</el-collapse-item>
+				</el-collapse>
 			</el-form>			
 			<span slot="footer" class="dialog-footer">
 				<el-button @click="close()">Cancelar</el-button>
@@ -327,13 +359,17 @@ export default {
 				this.companyId = parseInt( this.$store.getters.user.CompanyId);
 				this.companyName = this.$store.getters.user.Nombre;
 				this.user =  parseInt( this.$store.getters.user.Id);
+				this.logo = this.$store.getters.user.Logo;
 				this.columns = this.$route.meta.columns;
+				
                 this.URL_GET_CUSTOMERS= this.$route.meta.URL_GET_CUSTOMERS;
                 this.URL_GET_CUSTOMER= this.$route.meta.URL_GET_CUSTOMER;
                 this.URL_GET_CONCEPTS = this.$route.meta.URL_GET_CONCEPTS;
 				this.URL_CREATE_PAYMENT= this.$route.meta.URL_CREATE_PAYMENT;
 				this.URL_GET_PAYMENTMETHODS = this.$route.meta.URL_GET_PAYMENTMETHODS;
 				this.URL_GET_SYSTEMCUSTOM = this.$route.meta.URL_GET_SYSTEMCUSTOM;
+				this.URL_GET_COMPANY = this.$route.meta.URL_GET_COMPANY;
+
 				this.screen= this.$store.getters.userProfile.role.screens.filter(x=>x.path===this.$route.fullPath)[0];			
 				if (this.screen !=null)
 				{
@@ -347,7 +383,8 @@ export default {
 					this.getCustomers();
                     this.getConcepts();
 					this.getPaymentMethods();	
-					this.getSystemCustom();					
+					this.getSystemCustom();	
+					this.getCompany(this.companyId);				
 				}
 				else
 					this.showError("No se pudo recuperar la configuración de la pantalla");
@@ -358,7 +395,18 @@ export default {
 
         }, 	
 
-	methods: {		
+	methods: {	
+        getCompany(id){
+        let me = this;
+        axios
+            .get(this.URL_GET_COMPANY +id)
+            .then(function(response) {
+            me.company = response.data
+            })
+            .catch(function(error) {
+            me.showError();
+            });
+        }, 			
 		getCustomers() {
 			let me = this;
 			let url = me.URL_GET_CUSTOMERS+ parseInt(me.companyId);
@@ -421,7 +469,7 @@ export default {
 			});
 		},				     						
 		create(objeto) {
-
+			 this.modelo.details = objeto.details;
 			 this.modelo.id = objeto.noveltyId; 
 			 this.modelo.conceptName= objeto.conceptName;
              this.modelo.year= objeto.year;
@@ -446,6 +494,7 @@ export default {
              this.modelo.amount= objeto.price;
 			 this.dialogFormVisible = true;
 			 this.modalEditable = false;
+			 this.modelo.details = objeto.details;
 		},        
 		edit(objeto) {		
 			 this.modelo.id = objeto.noveltyId; 
@@ -491,7 +540,7 @@ export default {
 				'Amount':me.modelo.amount,
 				'PaymentMethodId': me.modelo.paymentMethodId
                 }).then(function(response){
-					 me.printTicket();
+					 me.printTicket(response.data);
                      me.close();
                      me.getCustomer();					 
 					 me.showOk();
@@ -503,40 +552,162 @@ export default {
 		},
 
 	  printResumen() {
-		const title = 'Resumen de Cuenta'; 
-		let name = title + " - "+this.customerDescription;
-		var heading= [
-		"Fecha: " + new Date().toLocaleString(),
-		"Cliente: " + this.customerDescription,
-		"Total Adeudado: $" + this.customerDebt			
-		];
-		const columns = [
-			{ title: "Concepto", dataKey: "conceptName" },
-			{ title: "Año", dataKey: "year" },
-			{ title: "Mes", dataKey: "month" },
-			{ title: "Precio", dataKey: "price" }
-			//{ title: "Adeuda", dataKey: "remainder" },
-		];
-		this.generatePdf(name,heading,title,columns,this.noveltiesFilter,this.companyName)
-	  },
 
-	  printTicket() {
-			const title = 'Comprobante de Pago'; 
-			let data= [];
-			let name = title + " - "+this.customerDescription;
-			var heading= [
-			"Fecha: " + new Date().toLocaleString(),
-			"Medio de Pago: " + this.paymentMethodDescription,
-			"Total: $" + this.modelo.amount			
-		];
+            let title = 'Resumen de Cuenta'; 
+            let name = title + " - "+this.customerDescription;
+            let bodyName = 'Cliente';
+
+            var heading= [
+            this.companyName,
+            ];
+            if (this.company.address!=null)
+            {
+                 heading.push(this.company.address)
+            }
+            if (this.company.phone!=null)
+            {
+                 heading.push(this.company.phone)
+            }
+            if (this.company.emails!=null)
+            {
+                 heading.push(this.company.emails)
+            }            
+
+            var heading2= [
+                "Fecha de Emisión",
+                new Date().toLocaleString(),
+                null,
+                null
+            ]; 
+
+            var body = [
+                this.customer.names
+            ];   
+
+            if (this.customer.documento != null){
+                body.push(this.customer.documento)
+            }
+            if (this.customer.address != null){
+                body.push(this.customer.address)
+            }
+            if (this.customer.phone != null){
+                body.push(this.customer.phone)
+            }
+            if (this.customer.email != null){
+                body.push(this.customer.email)
+            }			
+
 			const columns = [
 				{ title: "Concepto", dataKey: "conceptName" },
 				{ title: "Año", dataKey: "year" },
 				{ title: "Mes", dataKey: "month" },
-				{ title: "Valor", dataKey: "amount" },
-			];
-		data.push(this.modelo);
-		this.generatePdf(name,heading,title,columns,data,this.companyName);		
+				{ title: "Precio", dataKey: "price" },
+				{ title: "Adeuda", dataKey: "remainder" }
+			];			
+
+            var footer = [];   
+            footer.push(""); //1
+            footer.push("Total adeudado $: "); //2
+            footer.push(this.customerDebt.toString()); //3
+            footer.push(null); //4
+            footer.push(null); //5
+            footer.push(null); //6
+            footer.push(null); //7
+            footer.push(null); //8
+            footer.push(null); //9
+            footer.push(null); //10
+            footer.push(null); //11
+
+            this.generatePdf(name,heading,heading2,title,bodyName,body,columns, this.noveltiesFilter, this.logo, footer);
+
+
+	  },
+
+	 printTicket(factura) {
+            let title = 'Recibo de Pago'; 
+			let data= [];
+		 	let name = title + " - "+this.customerDescription;
+			let bodyName = 'Cliente';
+            var body = null;
+		//	var adeuda =0;
+					
+			data.push(this.modelo);
+
+		//	adeuda = this.modelo.remainder - this.modelo.amount;
+
+            var heading= [
+            this.companyName,
+            ];
+            if (this.company.address!=null)
+            {
+                 heading.push(this.company.address)
+            }
+            if (this.company.phone!=null)
+            {
+                 heading.push(this.company.phone)
+            }
+            if (this.company.emails!=null)
+            {
+                 heading.push(this.company.emails)
+            }            
+
+            var heading2= [
+                "Fecha de Emisión",
+                new Date().toLocaleString(),
+                "N° de factura",
+                factura
+            ];            
+
+            var body = [
+                this.customer.names
+            ];   
+
+            if (this.customer.documento != null){
+                body.push(this.customer.documento)
+            }
+            if (this.customer.address != null){
+                body.push(this.customer.address)
+            }
+            if (this.customer.phone != null){
+                body.push(this.customer.phone)
+            }
+            if (this.customer.email != null){
+                body.push(this.customer.email)
+            }		
+		 	const columns = [
+		 		{ title: "Concepto", dataKey: "conceptName" },
+		 		{ title: "Año", dataKey: "year" },
+		 		{ title: "Mes", dataKey: "month" },
+				{ title: "Precio", dataKey: "price" },
+				{ title: "Debia", dataKey: "remainder" },
+				{ title: "Abona", dataKey: "amount" },
+		 	];
+
+            var footer = [];  
+			if (this.paymentMethodDescription!=null) 
+			{
+				footer.push("Método de pago: " + this.paymentMethodDescription); //1
+			}
+			else{
+				footer.push(""); //1
+			}            
+            var footer = [];  
+			var observation = "";          
+            footer.push("Método de pago: " + this.paymentMethodDescription); //1
+            footer.push("Total parcial  $: "); //2
+            footer.push(this.modelo.remainder.toString()); //3
+            footer.push("Descuento     %: "); //4
+            footer.push("0,00"); //5
+            footer.push("Total a pagar $: "); //6
+            footer.push(this.modelo.remainder.toString()); //7
+            footer.push("Pagado $"); //8
+            footer.push(this.modelo.amount.toString()); //9
+            footer.push("Observación: " + observation); //10
+            footer.push("Firma"); //11
+
+            this.generatePdf(name,heading,heading2,title,bodyName,body,columns, data, this.logo, footer);
+
+	
 	  },
 
 	  handleChangeSelect() {
@@ -551,7 +722,36 @@ export default {
 	  handleSwitch(n){
 		  if (n.copy)
 		  	n.amount = n.remainder;
-	  },            			  	
+	  },         
+      getSummaries(param) {
+        const { columns, data } = param;
+        const sums = [];
+        columns.forEach((column, index) => {
+          if (index === 0) {
+            sums[index] = 'Total de pagos';
+            return;
+          }
+		  if (index === 1 ||  index === 2) {
+            return;
+          }
+          const values = data.map(item => Number(item[column.property]));
+          if (!values.every(value => isNaN(value))) {
+            sums[index] = '$ ' + values.reduce((prev, curr) => {
+              const value = Number(curr);
+              if (!isNaN(value)) {
+                return prev + curr;
+              } else {
+                return prev;
+              }
+            }, 0);
+          } else {
+            sums[index] = 'N/A';
+          }
+        });
+
+        return sums;
+      }	  
+	  
 	 }
 }
 </script>

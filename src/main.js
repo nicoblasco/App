@@ -53,6 +53,8 @@ import i18n_messages from './i18n.json'
 \* ═ ═ ═ ═ ═ ═ ═ ═ ═ */
 import PageHeader from './components/PageHeader.vue'
 import '@/mixins/shared'
+import '@/mixins/Customer/customerGeneric'
+import '@/mixins/Report/reportGeneric'
 //import './vue-error-handler'
 
 delete L.Icon.Default.prototype._getIconUrl;

@@ -181,6 +181,7 @@ export default {
 			height: 300,
 			sidebarOpen: false,
 			customers:null,
+			customer:null,
 			concepts:null,
 			paymentMethods: null,
 			paymentMethod: null,
@@ -195,7 +196,8 @@ export default {
 			añoMes: null,
 			hasData: false,
 			today: new Date().toLocaleString(),			
-			companyName: null
+			companyName: null, 
+			company: null
 		}
 	},
 	computed: {
@@ -204,12 +206,16 @@ export default {
 				return null;
 
 			return this.customers.filter(x=>x.id==this.searchCustomer)[0].names.toUpperCase()				
-		},
+		},	
 		total: function() {
 			if (this.novelties==null)
 				return;
-								
-			return this.novelties.reduce((acc, item) => acc + item.amount, 0);
+			
+			var total = 0;
+
+			total= this.novelties.filter(x=>x.copy).reduce((acc, item) => acc + item.amount, 0);
+			return Number(total.toFixed(2));
+
 		},
 		novelties_paid: function(){
 			if (this.novelties==null)
@@ -224,7 +230,6 @@ export default {
 		}
 	},
 	methods: {
-
 		filterTag(value, row) {
 			return row.tag === value;
 		},					
@@ -295,9 +300,31 @@ export default {
 			me.showError();
 			});
 		},		
+        getCompany(id){
+        let me = this;
+        axios
+            .get(this.URL_GET_COMPANY +id)
+            .then(function(response) {
+            me.company = response.data
+            })
+            .catch(function(error) {
+            me.showError();
+            });
+        },  		
+     async  getCustomer(id){
+        let me = this;
+        await axios
+            .get(this.URL_GET_CUSTOMER +id)
+            .then(function(response) {
+            me.customer= response.data
+            })
+            .catch(function(error) {
+            me.showError();
+            });
+        },  		
 		save(){	
 		   let me = this;	  		  	  
-		   let lista = '';
+		   let lista = null;
 		  
 		   this.$prompt('¿Desea registrar el pago?. A continuación podra grabar un comentario', 'Atención', {
 		 	confirmButtonText: 'OK',
@@ -333,10 +360,8 @@ export default {
 		 			axios.post(this.URL_CREATE_PAYMENT,
 		 			lista
 		 			).then(function(response){
-		 				loadingInstance.close();						
-						me.print();
-		 				me.showOk();
-						me.getNovelties();
+		 				loadingInstance.close();					
+						me.print(response.data);
 						
 		 			}).catch(function(error){
 		 				loadingInstance.close();
@@ -345,10 +370,10 @@ export default {
 		 		} catch (error) {
 		 			loadingInstance.close();
 		 			me.showError(error);
+					this.getNovelties();
 		 		}
 	
 		 		}).catch(() => {
-		 			loadingInstance.close();
 		 		this.$message({
 		 			type: 'info',
 		 			message: 'Cancelado'
@@ -368,24 +393,97 @@ export default {
 		if (n.copy)
 		  	n.amount = n.remainder;
 	  },
-	print(){		
-			const title = 'Comprobante de Pago'; 
-			let name = title + " - "+this.customerDescription;
-			var heading= [
-			"Fecha: " + new Date().toLocaleString(),
-			"Medio de Pago: " + this.paymentMethodDescription,
-			"Total: $" + this.total,
-			"Observación: " + this.observation			
-		];
+	async print(factura){		
+            await this.getCustomer(this.searchCustomer);
+            let title = 'Recibo de Pago.'; 
+            let name = title + " - "+this.companyName;
+            let bodyName = 'Cliente';
+
+            var heading= [
+            this.companyName,
+            ];
+            if (this.company.address!=null)
+            {
+                 heading.push(this.company.address)
+            }
+            if (this.company.phone!=null)
+            {
+                 heading.push(this.company.phone)
+            }
+            if (this.company.emails!=null)
+            {
+                 heading.push(this.company.emails)
+            }            
+
+			var f = new Date();
+			
+            var heading2= [
+                "Fecha de pago",
+                f.getDate() + "-"+ f.getMonth() + 1 + "-" +f.getFullYear(),
+                "N° de factura",
+				factura
+               // this.zeroFill(objeto.paymentId,6)
+            ];
+
+            var body = [
+                this.customer.names
+            ];   
+
+            if (this.customer.documento != null){
+                body.push(this.customer.documento)
+            }
+            if (this.customer.address != null){
+                body.push(this.customer.address)
+            }
+            if (this.customer.phone != null){
+                body.push(this.customer.phone)
+            }
+            if (this.customer.email != null){
+                body.push(this.customer.email)
+            }
+            
 			const columns = [
 				{ title: "Concepto", dataKey: "concept" },
 				{ title: "Año", dataKey: "year" },
 				{ title: "Mes", dataKey: "month" },
-				{ title: "Valor", dataKey: "amount" },
+                { title: "$ Precio", dataKey: "price" },
+				{ title: "$ Pagó", dataKey: "amount" }
 			];
 
-			this.generatePdf(name,heading,title,columns,this.novelties_paid,this.companyName);
+            var footer = [];   
+			var observation = "";
+			var totalFacturado= this.calcularTotalFacturado();
+			if (this.observation == null)
+				observation="";
+            footer.push("Método de pago: " + this.paymentMethodDescription); //1
+            footer.push("Total parcial  $: "); //2
+            footer.push(totalFacturado.toString()); //3
+            footer.push("Descuento     %: "); //4
+            footer.push("0,00"); //5
+            footer.push("Total a pagar $: "); //6
+            footer.push(totalFacturado.toString()); //7
+            footer.push("Pagado $"); //8
+            footer.push(this.total.toString()); //9
+            footer.push("Observación: " + observation); //10
+            footer.push("Firma"); //11
+            
+			try {
+				this.generatePdf(name,heading,heading2,title,bodyName,body,columns,this.novelties_paid, this.logo, footer);	 			
+				this.showOk();
+				this.getNovelties();
+			} catch (error) {
+				this.getNovelties();
+				me.showError(error);
 				
+			}
+            						
+		},
+		calcularTotalFacturado(){
+			var total=0;
+			this.novelties_paid.forEach(element => {
+				total += element.price;
+			});
+			return total;
 		}	  
 
 	},
@@ -393,15 +491,19 @@ export default {
 				this.URL_GET= this.$route.meta.URL_GET;	
 				this.URL_GET_NOVELTIES= this.$route.meta.URL_GET_NOVELTIES;	
 				this.URL_GET_CUSTOMERS = this.$route.meta.URL_GET_CUSTOMERS;
+				this.URL_GET_CUSTOMER = this.$route.meta.URL_GET_CUSTOMER;
 				this.URL_CREATE_PAYMENT = this.$route.meta.URL_CREATE_PAYMENT;
 				this.URL_GET_PAYMENTMETHODS = this.$route.meta.URL_GET_PAYMENTMETHODS;
 				this.URL_GET_SYSTEMCUSTOM = this.$route.meta.URL_GET_SYSTEMCUSTOM;
+				this.URL_GET_COMPANY = this.$route.meta.URL_GET_COMPANY;
 				this.companyId = parseInt( this.$store.getters.user.CompanyId);
 				this.userId =  parseInt( this.$store.getters.user.Id);
 				this.companyName = this.$store.getters.user.Nombre;
+				this.logo = this.$store.getters.user.Logo;
 				this.modelo = this.$route.meta.modelo;
 				this.getCustomers();
-				this.getNovelties();		
+				this.getNovelties();	
+				this.getCompany(this.companyId);	
 				this.getPaymentMethods();	
 				this.getSystemCustom();
 	},

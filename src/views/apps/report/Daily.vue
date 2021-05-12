@@ -234,6 +234,7 @@ export default {
                 URL_DELETE: null,
 				//Estan ordenados alfabeticamente	
                 companyName: null,
+                logo: null,
                 customers: null,
                 customer: null,
                 paymentMethods: null,
@@ -395,11 +396,14 @@ export default {
 				this.companyId = parseInt( this.$store.getters.user.CompanyId);
 				this.columns = this.$route.meta.columns;
                 this.companyName = this.$store.getters.user.Nombre;
+                this.logo = this.$store.getters.user.Logo;
                 this.URL_GET_CUSTOMERS= this.$route.meta.URL_GET_CUSTOMERS;
+                this.URL_GET_CUSTOMER= this.$route.meta.URL_GET_CUSTOMER;
+                this.URL_GET_COMPANY = this.$route.meta.URL_GET_COMPANY;
                 this.URL_GET_PAYMENT= this.$route.meta.URL_GET_PAYMENT;
                 this.URL_GET_PAYMENTMETHODS = this.$route.meta.URL_GET_PAYMENTMETHODS;
                 this.URL_UPDATE_PAYMENT = this.$route.meta.URL_UPDATE_PAYMENT;
-                this.URL_DELETE = this.$route.meta.URL_DELETE;
+                this.URL_DELETE = this.$route.meta.URL_DELETE;                
 				this.screen= this.$store.getters.userProfile.role.screens.filter(x=>x.path===this.$route.fullPath)[0];			
 				if (this.screen !=null)
 				{
@@ -412,6 +416,7 @@ export default {
 					this.actions = this.screen.actions;	
 					this.getCustomers();
                     this.getPaymentMethods();
+                    this.getCompany(this.companyId);
 				}
 				else
 					this.showError("No se pudo recuperar la configuración de la pantalla");
@@ -423,15 +428,15 @@ export default {
         }, 	
 
 	methods: {		
-		getCustomers() {
+		 getCustomers() {
 			let me = this;
 			let url = me.URL_GET_CUSTOMERS+ parseInt(me.companyId);
 			axios.get(url)
 			.then(function(response) {
 			me.customers = response.data;
-			})
+			 })
 			.catch(function(error) {
-			me.showError();
+			 me.showError();
 			});
 		}, 	  
 		getPayment() {
@@ -469,6 +474,28 @@ export default {
 			me.showError();
 			});
 		},        		
+        getCompany(id){
+        let me = this;
+        axios
+            .get(this.URL_GET_COMPANY +id)
+            .then(function(response) {
+            me.company = response.data
+            })
+            .catch(function(error) {
+            me.showError();
+            });
+        },              
+     async  getCustomer(id){
+        let me = this;
+        await axios
+            .get(this.URL_GET_CUSTOMER +id)
+            .then(function(response) {
+            me.customer= response.data
+            })
+            .catch(function(error) {
+            me.showError();
+            });
+        },                            
 		open(objeto) {		
 			 this.modelo = _.cloneDeep(objeto);
 			 this.dialogFormVisible = true;
@@ -579,50 +606,129 @@ export default {
 		
 			
 	 },	        
-        printResumen() {
+       printResumen() {
             let title = 'Resumen de Ingresos'; 
             let name = title + " - "+this.companyName;
+            var bodyName = null;
+            var body = null;
+
             var heading= [
-            "Fecha: " + new Date().toLocaleString(),
-            "Total: $" + this.totalCalculado			
+            this.companyName,
             ];
+            if (this.company.address!=null)
+            {
+                 heading.push(this.company.address)
+            }
+            if (this.company.phone!=null)
+            {
+                 heading.push(this.company.phone)
+            }
+            if (this.company.emails!=null)
+            {
+                 heading.push(this.company.emails)
+            }            
 
-            if (this.searchPayment!=null)
-             {
-                 heading.push("Medio de Pago: $" + this.paymentMethodDescription)
-             }
-
-            if (this.searchCustomer!=null)
-             {
-                 heading.push("Cliente: $" + this.customerDescription)
-             }             
+            var heading2= [
+                "Fecha de Emisión",
+                new Date().toLocaleString(),
+                null,
+                null
+            ];            
 
             const columns = [
                 { title: "Fecha de Pago", dataKey: "paymentDate" },
+                { title: "Factura", dataKey: "invoice" },
                 { title: "Cliente", dataKey: "customerName" },
                 { title: "Medio de Pago", dataKey: "paymentMethod" },
                 { title: "Total", dataKey: "total" }
             ];
-            this.generatePdf(name,heading,title,columns,this.paymentFilter,this.companyName)
+
+            var footer = [];   
+            footer.push(""); //1
+            footer.push("           Total $: "); //2
+            footer.push(this.totalCalculado.toString()); //3
+            footer.push(null); //4
+            footer.push(null); //5
+            footer.push(null); //6
+            footer.push(null); //7
+            footer.push(null); //8
+            footer.push(null); //9
+            footer.push(null); //10
+            footer.push(null); //11
+
+            this.generatePdf(name,heading,heading2,title,bodyName,body,columns, this.datos, this.logo, footer);
         },
-        printTicket(objeto) {
-            let title = 'Comprobante de Pago'; 
+        async printTicket(objeto) {
+            await this.getCustomer(objeto.customerId);
+            let title = 'Recibo de Pago.'; 
             let name = title + " - "+this.companyName;
+            let bodyName = 'Cliente';
+
             var heading= [
-            "Fecha de Pago: " + objeto.paymentDate,
-            "Cliente: " + objeto.customerName,
-            "Medio de Pago: " + objeto.paymentMethod,
-            "Total: $" + objeto.total			
+            this.companyName,
+            ];
+            if (this.company.address!=null)
+            {
+                 heading.push(this.company.address)
+            }
+            if (this.company.phone!=null)
+            {
+                 heading.push(this.company.phone)
+            }
+            if (this.company.emails!=null)
+            {
+                 heading.push(this.company.emails)
+            }            
+
+            var heading2= [
+                "Fecha de pago",
+                objeto.paymentDate,
+                "N° de factura",
+                this.zeroFill(objeto.invoice,6)
             ];
 
+            var body = [
+                this.customer.names
+            ];   
+
+            if (this.customer.documento != null){
+                body.push(this.customer.documento)
+            }
+            if (this.customer.address != null){
+                body.push(this.customer.address)
+            }
+            if (this.customer.phone != null){
+                body.push(this.customer.phone)
+            }
+            if (this.customer.email != null){
+                body.push(this.customer.email)
+            }
+            
 			const columns = [
 				{ title: "Concepto", dataKey: "conceptName" },
 				{ title: "Año", dataKey: "year" },
 				{ title: "Mes", dataKey: "month" },
-				{ title: "Valor", dataKey: "amount" }
+                { title: "$ Precio", dataKey: "price" },
+				{ title: "$ Pagó", dataKey: "amount" }
 			];
 
-            this.generatePdf(name,heading,title,columns,objeto.detail,this.companyName);
+            var footer = [];  
+			var observation = "";
+			if (objeto.observation == null)
+				observation="";             
+            footer.push("Método de pago: " + objeto.paymentMethod); //1
+            footer.push("Total parcial  $: "); //2
+            footer.push(objeto.totalInvoice.toString()); //3
+            footer.push("Descuento     %: "); //4
+            footer.push("0,00"); //5
+            footer.push("Total a pagar $: "); //6
+            footer.push(objeto.totalInvoice.toString()); //7
+            footer.push("Pagado $"); //8
+            footer.push(objeto.total.toString()); //9
+            footer.push("Observación: " + observation); //10
+            footer.push("Firma"); //11
+            
+            this.generatePdf(name,heading,heading2,title,bodyName,body,columns,objeto.detail, this.logo, footer);
         },
 	  handleChangeSelect() {
 

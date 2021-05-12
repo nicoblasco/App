@@ -129,6 +129,24 @@
 							</vue-scroll>
 						<!-- </div> -->
 					</el-tab-pane>
+					<el-tab-pane label="Documentación" name="third">
+						<vue-scroll class="table-box card-base card-outline">
+															<!-- :on-change="handleChange" -->
+							<el-upload
+								ref="uploadfiles"
+								class="upload-demo"
+								action="''"
+								:http-request="addFile"
+								:on-remove="handleRemove"
+								:before-upload="handlePreview"
+								:limit="10"
+								:on-exceed="handleExceed"
+								:file-list="data.documentationsCreated">
+								<el-button slot="trigger" size="small" type="primary">Selecciona un archivo</el-button>
+								<div slot="tip" class="el-upload__tip">Solo con un tamaño menor de 5Mb</div>
+							</el-upload>
+						</vue-scroll>
+					</el-tab-pane>
 				</el-tabs>				
 				<el-form-item size="large" class="bottom">
           			<el-button type="primary" v-on:click="$emit('addContact')">GUARDAR</el-button>
@@ -145,16 +163,26 @@ export default {
 	props: ['data', 'dialogvisible','cities','documentType','tariffs'],
 	data() {
 		return {
+			// fileList: [{name: 'food.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}, {name: 'food2.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}],			
+    // docList: [{
+    //       name: 'food.jpeg',
+    //       url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
+    //     }, {
+    //       name: 'food2.jpeg',
+    //       url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
+    //     }],
 			imagePlaceholder: 'data:image/jpeg;base64,/9j/4QAYRXhpZgAASUkqAAgAAAAAAAAAAAAAAP/sABFEdWNreQABAAQAAAAeAAD/4QMvaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLwA8P3hwYWNrZXQgYmVnaW49Iu+7vyIgaWQ9Ilc1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCI/PiA8eDp4bXBtZXRhIHhtbG5zOng9ImFkb2JlOm5zOm1ldGEvIiB4OnhtcHRrPSJBZG9iZSBYTVAgQ29yZSA1LjYtYzE0MCA3OS4xNjA0NTEsIDIwMTcvMDUvMDYtMDE6MDg6MjEgICAgICAgICI+IDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+IDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOkExM0RGNDdBMzM1QzExRThCNjhCOTFBMEVCQUQzNDYxIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOkExM0RGNDc5MzM1QzExRThCNjhCOTFBMEVCQUQzNDYxIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE1IChXaW5kb3dzKSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkRBMUEyQ0NDMjc2QzExRTg5QUMyOTk2OTcxQkYxODMyIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkRBMUEyQ0NEMjc2QzExRTg5QUMyOTk2OTcxQkYxODMyIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+/+4AIUFkb2JlAGTAAAAAAQMAEAMCAwYAAAWZAAAGSQAACC7/2wCEABALCwsMCxAMDBAXDw0PFxsUEBAUGx8XFxcXFx8eFxoaGhoXHh4jJSclIx4vLzMzLy9AQEBAQEBAQEBAQEBAQEABEQ8PERMRFRISFRQRFBEUGhQWFhQaJhoaHBoaJjAjHh4eHiMwKy4nJycuKzU1MDA1NUBAP0BAQEBAQEBAQEBAQP/CABEIAGQAZAMBIgACEQEDEQH/xACdAAEAAgMBAQAAAAAAAAAAAAAABQYBBAcCAwEBAAMBAAAAAAAAAAAAAAAAAAECAwQQAAEEAgMBAQEAAAAAAAAAAAECAwQFEQYAIDAQQBIRAAIBAgMCCwcFAAAAAAAAAAECAxEEACExYRIgMEFRcYGRodFSExBAsSIyQnKSsiMzBRIAAQQDAQEBAAAAAAAAAAAAAQAgMBEQITFxYYH/2gAMAwEAAhEDEQAAAOgAAHzPo09syAAAACF57IRXRjichFq9f9QE/wA24RIAAHLNGyVvpwGbRebPHSPNuFZAAERLfqVa2dct+x1eKmOuOedBy19CsgAY5b1LnOlIUb5ALzSL/nawDDYABjIgIK+L155I3IjS3SlwAAAAAAAAP//aAAgBAgABBQDxQkAEAgjB6JOU8Ucq+gEkIUnhSs8Ukp6NEZ+OEfz0DihwuK4Tny//2gAIAQMAAQUA8VqyQSOA5HRQweJGB9JxwqSeZSOJUD0czj4jOehQk8/hPn//2gAIAQEAAQUA/E9IYjobtqt1Xlsl+mojypcmY7gcodmlVjrbiHW/DZ5SpN590uSp+l8L0EXX3Q0kVfhutWtif8SlS1UNcayr8JjcN6PYaK8lbek3a10+t11Mrw2C+ap482dLsHod/cQkubhfLTJlSZblDtMqucbcQ632up67Gz66NYKehdVAKF9rUmqX0ZZdfd1fXnKlHYgEWOnVUwv6JZoKdKvFGJoSs11RX1iP3f/aAAgBAgIGPwCH6VRRDRgllBaKokDxbYb7mj+N7jcX/9oACAEDAgY/AIrCtpwGWVsLQv2Xkn//2gAIAQEBBj8A9y355FiTzOwUd+NyO8hdjookUn48WFiAe8mr6SnRQNXbBmupWmkP3Ma06BoOr2LFO7TWJNGQmpjHmQnm5sLJGwZHAZWGhBzB4m6LHKJvSQcwQU+NeAI3NTbyNGPxyZf3cTfA5fzue014E7chnNOpV4kf6CLWC5ADkaLIopn+QHtVEBZ2ICqMySdAMQ2rf20Ly087Zns04lob3cMEvylZCADXTXlwX/zZleM5iKXJhsDitevAVxFGvKxevcowk9xKst23ypI9FVSeSNSde/iRQCS6lr6MR0y+5tgwZryUyudK/SuxV0GAkF0+4Mgj0kUdG/WmN311Tasag99cerdSvM/mclqdHNhYLtmmsjka5vHtU82zswskbBkcBlYaEHMHhz3JNVLFYhzRrkvjwpbGQ1NswMdfI9cuog8IqdCKHDSxAzWJzWQZlNknjwVhhQySuaKiipJw9xctW6nUKyKaqig1ptPDIIqDkQcGSCtpKcyY/oJ2ocuymD6E0Mo5K7yH4MO/FCsSjnMnguAb66G7ypCM/wBT+GN2zhCMcmkPzO3Sxz9//9k=',
 			activeName: 'first'
 	}
   },
     watch: { 
       	dialogvisible: function(newVal, oldVal) { // watch it
-          if (oldVal)
-		  	this.activeName= 'first';
+          if (oldVal){
+			  this.activeName= 'first';			 
+		  }
+		  	
 		}
-    },  
+    }, 
   	methods: {	  
 		uploadFile(file, files) {
 			this.encodeImage(file.raw)
@@ -170,9 +198,103 @@ export default {
 				reader.readAsDataURL(input);
 			}
 		},
+   	    encodeFiles (file) {;
+			if (file) {				
+			    let objeto = {
+					'name': file.name,
+					'size': file.size
+				}
+				const reader = new FileReader()
+				reader.onload = (e) => {
+				objeto.file = e.target.result;
+				this.data.documentations.push(objeto);
+				}
+				reader.readAsDataURL(file);
+			}
+		},		
 		handleTabClick(tab, event) {
 			this.activeName = tab.name;
-      	},		  
+      	},	
+       //Files	
+	    handlePreview(file) {
+			 if (!this.checkSize(file)) {
+			 	this.$message.warning('El archivo no puede ser mayor a 5Mb');				
+				return false;
+			 }
+			 if (!this.checkDuplicated(file)) {
+			 	this.$message.warning('El archivo se encuentra repetido.');				
+			 	return false;
+			 }
+		//	this.docList.push(file);
+		},
+		handleRemove(file, fileList) {
+			var i = 0;
+			var eleRmv =0;
+			var y = 0;
+			var eleRmvY =0;
+			var isDocumentation=false;
+			var isDocumentationCreated=false;
+			//Lo elimino si es uno que acabo de dar de alta
+			this.data.documentations.forEach(element => {
+				if (element.name == file.name){
+					eleRmv=i;
+					isDocumentation=true;
+				}
+				i++;
+			});
+			if (isDocumentation)
+			{
+				this.data.documentations.splice(eleRmv, 1);
+			}
+				
+			//Si es uno que ya estaba creado guardo el id
+
+			this.data.documentationsCreated.forEach(element => {
+				if (element.name == file.name){
+					eleRmvY = y;
+					isDocumentationCreated=true;
+					this.data.documentationsRemoved.push(element);
+				}
+				y++;
+			});
+
+			if (isDocumentationCreated)
+				this.data.documentationsCreated.splice(eleRmvY, 1);
+
+		},
+		handleExceed(files, fileList) {
+			this.$message.warning(`El límite es 10, haz seleccionado ${files.length} archivos esta vez, añade hasta ${files.length + fileList.length}`);
+		},
+		addFile (files){
+			this.encodeFiles(files.file);
+		},
+		 checkSize(file) {
+			const isLt5M = file.size / 1024 / 1024 < 5;
+			if (!isLt5M) {
+				return false;				
+			}
+			else
+			{
+				return true;
+			}	
+		 },
+		 checkDuplicated(file){
+			 var exito = true;
+			 this.data.documentations.forEach(element => {
+				 if (element.name == file.name){
+					 exito = false;
+				 }
+			 });
+			 this.data.documentationsCreated.forEach(element => {
+				 if (element.name == file.name){
+					 exito = false;
+				 }
+			 });
+
+			 return exito;
+		 },
+
+
 	},
 	
 }

@@ -104,7 +104,10 @@ export default {
 				keyMunicipal: null,
 				legajoMunicipal: null,
 				keyArba: null,
-				tariffs: []
+				tariffs: [],
+				documentations: [],
+				documentationsCreated: [],
+				documentationsRemoved: [],
 			},
 			formLabelWidth: '120px',
 			fields: null,
@@ -129,6 +132,7 @@ export default {
 				this.URL_GET_DOCUMENT_TYPE = this.$route.meta.URL_GET_DOCUMENT_TYPE;
                 this.URL_CITIES = this.$route.meta.URL_CITIES;
                 this.URL_GET_TARIFFS = this.$route.meta.URL_GET_TARIFFS;
+				this.URL_GET_DOCUMENTATIONS = this.$route.meta.URL_GET_DOCUMENTATIONS;
 				this.screen= this.$store.getters.userProfile.role.screens.filter(x=>x.path===this.$route.fullPath)[0];	
 				if (this.screen !=null)
 				{
@@ -165,7 +169,6 @@ export default {
 
 		openDialog(objeto) {
 			this.clean();
-
 			if (objeto!=null){
 
 				this.data.id=objeto.id;		
@@ -188,15 +191,16 @@ export default {
 				this.data.logo= objeto.logo;
                 this.data.logoName= objeto.logoName;
                 this.data.tariffs=objeto.tariffs;
+				this.data.documentationsCreated = objeto.documentationsCreated;
 				this.editedIndex=0;
-				
+				this.getDocs();
 			}
 			else
 			{
 				this.editedIndex=-1;				
 			}
 				
-			this.getTariffs();
+			this.getTariffs();			
 			this.dialogvisible = true
 		},
 		setPageWidth() {
@@ -228,7 +232,7 @@ export default {
         }, 
 		getTariffs() {
 			let me = this;
-			let url = me.URL_GET_TARIFFS;
+			let url = me.URL_GET_TARIFFS
 			axios.get(url,{	params : {
 			   	'CompanyId' : parseInt(me.companyId),
 				'CustomerId' : me.data.id				
@@ -240,7 +244,16 @@ export default {
 			.catch(function(error) {
 			me.showError();
 			});
-		}, 		         			
+		}, 		
+		getDocs() {
+			let me = this;
+			let url = me.URL_GET_DOCUMENTATIONS+ parseInt(me.data.id);
+            axios.get(url).then (function(response){
+                me.data.documentationsCreated = response.data;
+            }).catch (function (error){
+			me.showError();
+			});
+		}, 			         			
 		get(){
 			let me = this;
 			let url = this.URL_GET+ parseInt(me.companyId);
@@ -291,7 +304,9 @@ export default {
 					'Phone':me.data.phone,
 					'Logo': me.data.logo,
                     'LogoName': me.data.logoName,
-                    'Tariffs': []					 
+                    'Tariffs': [],
+					'Documentations': [],
+					'DocumentationsRemoved': []
 				 }
 
 				
@@ -304,6 +319,27 @@ export default {
 					}
 					objeto_upd.Tariffs.push(objTarifa);
 				});
+
+
+				me.data.documentations.forEach(doc=> {
+					let objDocumentationCreated= {
+						Name: doc.name,
+						Size: doc.size,
+						File: doc.file
+					}
+					objeto_upd.Documentations.push(objDocumentationCreated);
+				});	
+
+				me.data.documentationsRemoved.forEach(doc=> {
+					let objDocumentationRemoved= {
+						Id: doc.id,
+						Name: doc.name,
+						Size: doc.size,
+						File: doc.file,
+						Path: doc.path
+					}
+					objeto_upd.DocumentationsRemoved.push(objDocumentationRemoved);
+				});					
 
                 axios.put(this.URL_UPDATE,objeto_upd
 				).then(function(response){
@@ -336,7 +372,8 @@ export default {
 					'Phone':me.data.phone,
 					'Logo': me.data.logo,
                     'LogoName': me.data.logoName,
-                    'Tariffs': []					 
+                    'Tariffs': [],
+					'Documentations': []
 				 }
 
 				
@@ -348,7 +385,17 @@ export default {
 						Enabled: tarifa.enabled
 					}
 					objeto_add.Tariffs.push(objTarifa);
-				});				
+				});		
+				
+
+				me.data.documentations.forEach(doc=> {
+					let objDocumentation= {
+						Name: doc.name,
+						Size: doc.size,
+						File: doc.file
+					}
+					objeto_add.Documentations.push(objDocumentation);
+				});					
 
                 axios.post(this.URL_CREATE,
 				 objeto_add
@@ -412,12 +459,17 @@ export default {
 			this.data.legajoMunicipal = null;
             this.data.documentTypeId=null;
             this.data.tariffs=null;
+			this.data.documentations=[];
+			this.data.documentationsRemoved=[],
+			this.data.documentationsCreated=[],
 			this.data.favorite=false;
 			this.data.observation=null;
 			this.data.phone=null;
 			this.data.logo= 'data:image/jpeg;base64,/9j/4QAYRXhpZgAASUkqAAgAAAAAAAAAAAAAAP/sABFEdWNreQABAAQAAAAeAAD/4QMvaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLwA8P3hwYWNrZXQgYmVnaW49Iu+7vyIgaWQ9Ilc1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCI/PiA8eDp4bXBtZXRhIHhtbG5zOng9ImFkb2JlOm5zOm1ldGEvIiB4OnhtcHRrPSJBZG9iZSBYTVAgQ29yZSA1LjYtYzE0MCA3OS4xNjA0NTEsIDIwMTcvMDUvMDYtMDE6MDg6MjEgICAgICAgICI+IDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+IDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOkExM0RGNDdBMzM1QzExRThCNjhCOTFBMEVCQUQzNDYxIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOkExM0RGNDc5MzM1QzExRThCNjhCOTFBMEVCQUQzNDYxIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE1IChXaW5kb3dzKSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkRBMUEyQ0NDMjc2QzExRTg5QUMyOTk2OTcxQkYxODMyIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkRBMUEyQ0NEMjc2QzExRTg5QUMyOTk2OTcxQkYxODMyIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+/+4AIUFkb2JlAGTAAAAAAQMAEAMCAwYAAAWZAAAGSQAACC7/2wCEABALCwsMCxAMDBAXDw0PFxsUEBAUGx8XFxcXFx8eFxoaGhoXHh4jJSclIx4vLzMzLy9AQEBAQEBAQEBAQEBAQEABEQ8PERMRFRISFRQRFBEUGhQWFhQaJhoaHBoaJjAjHh4eHiMwKy4nJycuKzU1MDA1NUBAP0BAQEBAQEBAQEBAQP/CABEIAGQAZAMBIgACEQEDEQH/xACdAAEAAgMBAQAAAAAAAAAAAAAABQYBBAcCAwEBAAMBAAAAAAAAAAAAAAAAAAECAwQQAAEEAgMBAQEAAAAAAAAAAAECAwQFEQYAIDAQQBIRAAIBAgMCCwcFAAAAAAAAAAECAxEEACExYRIgMEFRcYGRodFSExBAsSIyQnKSsiMzBRIAAQQDAQEBAAAAAAAAAAAAAQAgMBEQITFxYYH/2gAMAwEAAhEDEQAAAOgAAHzPo09syAAAACF57IRXRjichFq9f9QE/wA24RIAAHLNGyVvpwGbRebPHSPNuFZAAERLfqVa2dct+x1eKmOuOedBy19CsgAY5b1LnOlIUb5ALzSL/nawDDYABjIgIK+L155I3IjS3SlwAAAAAAAAP//aAAgBAgABBQDxQkAEAgjB6JOU8Ucq+gEkIUnhSs8Ukp6NEZ+OEfz0DihwuK4Tny//2gAIAQMAAQUA8VqyQSOA5HRQweJGB9JxwqSeZSOJUD0czj4jOehQk8/hPn//2gAIAQEAAQUA/E9IYjobtqt1Xlsl+mojypcmY7gcodmlVjrbiHW/DZ5SpN590uSp+l8L0EXX3Q0kVfhutWtif8SlS1UNcayr8JjcN6PYaK8lbek3a10+t11Mrw2C+ap482dLsHod/cQkubhfLTJlSZblDtMqucbcQ632up67Gz66NYKehdVAKF9rUmqX0ZZdfd1fXnKlHYgEWOnVUwv6JZoKdKvFGJoSs11RX1iP3f/aAAgBAgIGPwCH6VRRDRgllBaKokDxbYb7mj+N7jcX/9oACAEDAgY/AIrCtpwGWVsLQv2Xkn//2gAIAQEBBj8A9y355FiTzOwUd+NyO8hdjookUn48WFiAe8mr6SnRQNXbBmupWmkP3Ma06BoOr2LFO7TWJNGQmpjHmQnm5sLJGwZHAZWGhBzB4m6LHKJvSQcwQU+NeAI3NTbyNGPxyZf3cTfA5fzue014E7chnNOpV4kf6CLWC5ADkaLIopn+QHtVEBZ2ICqMySdAMQ2rf20Ly087Zns04lob3cMEvylZCADXTXlwX/zZleM5iKXJhsDitevAVxFGvKxevcowk9xKst23ypI9FVSeSNSde/iRQCS6lr6MR0y+5tgwZryUyudK/SuxV0GAkF0+4Mgj0kUdG/WmN311Tasag99cerdSvM/mclqdHNhYLtmmsjka5vHtU82zswskbBkcBlYaEHMHhz3JNVLFYhzRrkvjwpbGQ1NswMdfI9cuog8IqdCKHDSxAzWJzWQZlNknjwVhhQySuaKiipJw9xctW6nUKyKaqig1ptPDIIqDkQcGSCtpKcyY/oJ2ocuymD6E0Mo5K7yH4MO/FCsSjnMnguAb66G7ypCM/wBT+GN2zhCMcmkPzO3Sxz9//9k=';
 			this.data.logoName= null;
-			this.editedIndex=-1;			
+			this.editedIndex=-1;		
+			if (this.$refs['dialog-provider'].$refs['uploadfiles'] != undefined)
+				this.$refs['dialog-provider'].$refs['uploadfiles'].clearFiles();
 		},
 		__resizeHanlder: _.throttle(function (e) {
 			this.setPageWidth()

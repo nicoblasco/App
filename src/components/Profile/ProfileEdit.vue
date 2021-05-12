@@ -116,7 +116,12 @@
 							</el-option>
 						</el-select>
 					</el-form-item>
-				</el-col>			
+				</el-col>	
+				<el-col :span="12" :md="12" :sm="24" :xs="24" class="col-p">
+					<el-form-item label="Email Contacto">
+						<el-input v-model="form.emails"/>
+					</el-form-item>
+				</el-col>						
 			</el-col>	
 			<el-col class="col-p">
 				<el-form-item label="Comentario">
@@ -150,6 +155,7 @@ export default {
 		contactLastName: String,
 		initialDate: Date,
 		email: String,
+		emails: String,
 		phone: String,
 		website: String,
 		address: String,

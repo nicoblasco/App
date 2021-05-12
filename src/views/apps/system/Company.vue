@@ -378,6 +378,7 @@ export default {
         contactLastName: '',
         initialDate: '',
         email: '',
+        emails: '',
         phone: '',
         website: '',
         address: '',
@@ -578,6 +579,7 @@ export default {
           me.company.contactLastName =response.data.contactLastName;
           me.company.initialDate =response.data.initialDate;
           me.company.email =response.data.email;
+          me.company.emails =response.data.emails;
           me.company.phone =response.data.phone;
           me.company.website =response.data.website;
           me.company.address =response.data.address;
@@ -588,7 +590,7 @@ export default {
           me.company.schedule =response.data.schedule;
           me.company.comment =response.data.comment;
           me.company.logo =response.data.logo;
-          me.company.logoName= response.data.logoName;
+          me.company.logoname= response.data.logoName;
           me.company.id =id;
           me.company.sectors= response.data.sectors
         })
@@ -763,6 +765,7 @@ export default {
        ContactLastName: me.company.contactLastName,
        InitialDate: me.company.initialDate,
        Email: me.company.email,
+       Emails: me.company.emails,
        Phone: me.company.phone,
        Website: me.company.website,
        Address: me.company.address,
@@ -772,7 +775,7 @@ export default {
        Country: me.company.country,
        Schedule: me.company.schedule,
        Logo: me.company.logo,
-       LogoName: me.company.logoName,
+       LogoName: me.company.logoname,
        Comment: me.company.comment,
        ConfigScreens: [],
        SecurityRoles:[],
@@ -890,6 +893,7 @@ export default {
        ContactLastName: me.company.contactLastName,
        InitialDate: me.company.initialDate,
        Email: me.company.email,
+       Emails: me.company.emails,
        Phone: me.company.phone,
        Website: me.company.website,
        Address: me.company.address,

@@ -5,13 +5,18 @@
 			<!--<div class="username" v-affix="{parentid: 'affix-container', boundaryid: '', delay:600, offset:0, enable:() => affixEnabled}">-->
 			<div class="username">
 				<div class="cover-small"></div>
-				<div class="avatar-small"><img src="@/assets/images/avatar-2.jpg" alt="avatar"></div>
+				<div class="avatar-small"><img :src="this.logo ? this.logo :  '@/assets/images/avatar-2.jpg'" alt="avatar"></div>
+				
 				<span>{{username}}</span>
 				<div class="colors-box">
 					<div v-for="i in 5" :key="i" :class="{'color':true, 'active':colorActive}" :style="{'background':color}"></div>
 				</div>
+			</div>			
+			<div class="avatar">
+				<img :src="this.logo ? this.logo :  '@/assets/images/avatar-2.jpg'" alt="avatar">
+				<!-- <img src='' alt="avatar" v-if="logo==null">			
+				<img :src="data.logo ? data.logo : imagePlaceholder"  alt="user avatar"> -->
 			</div>
-			<div class="avatar"><img src="@/assets/images/avatar-2.jpg" alt="avatar"></div>
 			<img src="@/assets/images/cover-2.jpg" id="color-thief" class="color-thief" alt="profile cover">
 		</div>
 	</vue-scroll>
@@ -27,6 +32,7 @@ export default {
 		return {
 			username: null,
 			companyId: null,
+			logo: null,
 			user: null,
 			colorActive: false,
 			color: 'white',
@@ -38,6 +44,7 @@ export default {
 				this.companyId = parseInt( this.$store.getters.user.CompanyId);
 				this.user = this.username = this.$store.getters.user;
 				this.username = this.$store.getters.user.Nombre;
+				this.logo = this.$store.getters.user.Logo;
 			} catch (error) {
 				this.showError(error);
 			}
