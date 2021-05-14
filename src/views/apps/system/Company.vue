@@ -332,6 +332,7 @@ import action from "../../../components/Actions.vue";
 import role from "../../../components/Role.vue";
 import screenact from "../../../components/ScreenRole.vue";
 import { Loading } from 'element-ui';
+import moment from 'moment';
 
 export default {
   name: "Company",
@@ -574,10 +575,15 @@ export default {
       axios
         .get(this.URL_GET_COMPANY + '/'+id)
         .then(function(response) {
+          var fechaInicial =  null;
+          if (response.data.initialDate!=null)
+            fechaInicial = moment(response.data.initialDate,"DD/MM/YYYY").format('MM/DD/YYYY')
           me.company.name = response.data.name;
           me.company.contactName =response.data.contactName;
           me.company.contactLastName =response.data.contactLastName;
-          me.company.initialDate =response.data.initialDate;
+          
+          //me.company.initialDate =response.data.initialDate;
+          me.company.initialDate =fechaInicial;
           me.company.email =response.data.email;
           me.company.emails =response.data.emails;
           me.company.phone =response.data.phone;

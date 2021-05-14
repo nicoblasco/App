@@ -63,6 +63,7 @@ const router = new Router({
 				URL_GET_DOCUMENT_TYPE: 'api/DocumentTypes/',
 				URL_GET_TARIFFS: 'api/Tariffs/',
 				URL_GET_DOCUMENTATIONS: 'api/CustomerDocumentations/',
+				URL_GET_DOCUMENTATION: 'api/CustomerDocumentations/Download/',
 				URL_CITIES: 'api/Countries/GetFull/'
 			}
 		},	

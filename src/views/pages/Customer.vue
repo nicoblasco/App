@@ -133,6 +133,7 @@ export default {
                 this.URL_CITIES = this.$route.meta.URL_CITIES;
                 this.URL_GET_TARIFFS = this.$route.meta.URL_GET_TARIFFS;
 				this.URL_GET_DOCUMENTATIONS = this.$route.meta.URL_GET_DOCUMENTATIONS;
+				this.URL_GET_DOCUMENTATION = this.$route.meta.URL_GET_DOCUMENTATION;
 				this.screen= this.$store.getters.userProfile.role.screens.filter(x=>x.path===this.$route.fullPath)[0];	
 				if (this.screen !=null)
 				{

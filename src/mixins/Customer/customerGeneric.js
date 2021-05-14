@@ -5,7 +5,7 @@ Vue.mixin({
     data() {
         return {
             URL_GET_CUSTOMERS: 'api/Customers/',
-            URL_GET_CUSTOMER: 'api/Customers/GetCustomer/'    
+            URL_GET_CUSTOMER: 'api/Customers/GetCustomer/'
         };
       },
     methods: {
@@ -31,7 +31,7 @@ Vue.mixin({
 			.catch(function(error) {
 			me.showError();
 			});
-		}, 	        
+		}	        
     }
 
 })        
