@@ -54,6 +54,9 @@
 				<el-form-item v-if="fields[FIELD_PERMANENT].visible" v-bind:label="fields[FIELD_PERMANENT].name" :label-width="formLabelWidth"  >
 					<el-switch inactive-text class="mr-20 themed" v-model="modelo.permanent"></el-switch>	
 				</el-form-item>					
+				<el-form-item v-if="fields[FIELD_VEP].visible" v-bind:label="fields[FIELD_VEP].name" :label-width="formLabelWidth"  >
+					<el-switch inactive-text class="mr-20 themed" v-model="modelo.vep"></el-switch>	
+				</el-form-item>					
 				<el-form-item v-if="fields[FIELD_ENABLED].visible" v-bind:label="fields[FIELD_ENABLED].name" :label-width="formLabelWidth"  >
 					<el-switch inactive-text class="mr-20 themed" v-model="modelo.enabled"></el-switch>	
 				</el-form-item>		
@@ -82,7 +85,8 @@ export default {
 				//Estan ordenados alfabeticamente
 				FIELD_DESCRIPTION: 1,
 				FIELD_PERMANENT: 2,
-				FIELD_ENABLED: 3,
+				FIELD_VEP: 3,
+				FIELD_ENABLED: 4,
 				FIELD_ID: 0,								
 				dialogFormVisible: false,
 				editedIndex: -1,
@@ -118,7 +122,15 @@ export default {
 						tdClass: 'text-left',
 						filterable: true,
 						formatFn: this.formatFn,
-					},					
+					},
+					{
+						label: 'Vep',
+						field: 'vep',
+						type: 'text',
+						tdClass: 'text-left',
+						filterable: true,
+						formatFn: this.formatFn,
+					},											
 					{
 						label: 'Acciones',
 						field: 'actions',
@@ -212,6 +224,7 @@ export default {
                     'Id': me.modelo.id,
 					'Description':me.modelo.description,
 					'Permanent':me.modelo.permanent,
+					'Vep':me.modelo.vep
                 }).then(function(response){
                      me.close();
                      me.get();   
@@ -227,7 +240,8 @@ export default {
                 axios.post(this.URL_CREATE,{
 					'Description':me.modelo.description,
 					'CompanyId': me.companyId,
-					'Permanent': me.modelo.permanent			
+					'Permanent': me.modelo.permanent,			
+					'Vep': me.modelo.vep
                 }).then(function(response){
                      me.close();
                      me.get();   
@@ -277,6 +291,7 @@ export default {
 			 this.editedIndex=-1;	
 			 this.modelo.description == this.fields[this.FIELD_DESCRIPTION].defaultValue;
 			 this.modelo.permanent == this.fields[this.FIELD_PERMANENT].defaultValue;
+			 this.modelo.vep == this.fields[this.FIELD_VEP].defaultValue;
 			 this.clean();	
 			 			 
 		},
@@ -284,6 +299,7 @@ export default {
 			 this.modelo.id = objeto.id; 
 			 this.modelo.description= objeto.description
 			 this.modelo.permanent= objeto.permanent
+			 this.modelo.vep= objeto.vep
 			 this.dialogFormVisible = true;
 			 this.editedIndex=0;
 		},
@@ -295,6 +311,7 @@ export default {
             this.modelo.id="";
             this.modelo.description="";
 			this.modelo.permanent=false;
+			this.modelo.vep=false;
             this.editedIndex=-1;
 		}
             			  	

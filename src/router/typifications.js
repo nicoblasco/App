@@ -118,6 +118,7 @@ export default {
 					id: '',
 					description: '',
 					permanent: false,					
+					vep: false,
 					enabled: true
 				}			
 			}

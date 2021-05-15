@@ -17,6 +17,7 @@ import NotFound from '../views/pages/NotFound.vue'
 import Provider from '../views/pages/Provider.vue'
 import Customer from '../views/pages/Customer.vue'
 import Novelty from '../views/pages/Novelty.vue'
+import Vep from '../views/pages/Vep.vue'
 import Payment from '../views/pages/Payment.vue'
 
 import Vehicles from '../views/pages/Vehicles.vue'
@@ -88,6 +89,34 @@ const router = new Router({
 					month: null,
 					price: null,
 					enabled: null		
+				}
+					
+			} 
+		},			
+		{
+			path: '/vep',
+			name: 'vep',
+			component: Vep,
+			meta: {
+				auth: true,
+				layout: layouts.navLeft,		
+				searchable: true,		
+				URL_GET: 'api/Novelties/',
+				URL_GET_CUSTOMERS: 'api/Customers/',
+				URL_GET_CONCEPTS: 'api/Concepts/',
+				URL_GET_TARIFFS: 'api/Tariffs/',
+				URL_CREATE: 'api/Veps/Create',
+				URL_UPDATE: 'api/Veps/Update',
+				URL_DELETE: 'api/Veps/Delete',
+				URL_CREATE_NOVELTIES: 'api/Novelties/PostNovelties',
+				modelo: {
+					id: null,
+					customerId: null,
+					tariffId: null,
+					createdDate: null,
+					detail: null,
+					price: null,
+					paid: null		
 				}
 					
 			} 

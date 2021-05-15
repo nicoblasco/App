@@ -763,13 +763,15 @@ export default {
     updateCompany(id){      
       let loadingInstance  = Loading.service({ fullscreen: true });
       let me = this;
-      debugger
+      let fechaInicial = null;
+      if (me.company.initialDate!=null)
+         fechaInicial = moment(me.company.initialDate,"MM/DD/YYYY").format('DD/MM/YYYY')
       let objeto = {
        Id: id,
        Name: me.company.name,
        ContactName: me.company.contactName,
        ContactLastName: me.company.contactLastName,
-       InitialDate: me.company.initialDate,
+       InitialDate: fechaInicial,
        Email: me.company.email,
        Emails: me.company.emails,
        Phone: me.company.phone,
@@ -875,7 +877,6 @@ export default {
       objeto.SecurityRoles.push(objRol);  
       });
 
-      debugger
       axios.post(this.URL_UPDATE_COMPANY, objeto)
         .then(function(response) {
           me.isOk = true;
@@ -892,12 +893,15 @@ export default {
     saveCompany() {
       let loadingInstance  = Loading.service({ fullscreen: true });
       let me = this;
+      let fechaInicial = null;
+      if (me.company.initialDate!=null)
+         fechaInicial = moment(me.company.initialDate,"MM/DD/YYYY").format('DD/MM/YYYY')
 
       let objeto = {
        Name: me.company.name,
        ContactName: me.company.contactName,
        ContactLastName: me.company.contactLastName,
-       InitialDate: me.company.initialDate,
+       InitialDate: fechaInicial,
        Email: me.company.email,
        Emails: me.company.emails,
        Phone: me.company.phone,

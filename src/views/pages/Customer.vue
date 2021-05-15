@@ -44,7 +44,7 @@
 							<div class="phone fs-14 secondary-text">{{c.phone}}</div>
 							<div class="email fs-14 secondary-text">{{c.city}}</div>
 						</div>
-						<div class="phone align-vertical p-10"><span class="align-vertical-middle">{{c.phone}}</span></div>
+						<div class="phone align-vertical p-10"><span class="align-vertical-middle">{{c.documento}}</span></div>
 					</div>
 				</div>
 			</div>

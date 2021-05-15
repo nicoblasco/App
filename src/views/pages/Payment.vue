@@ -57,109 +57,108 @@
 				</div>
 			</vue-scroll>
 		</div>
-		<div class="list-container box grow flex column">
-	   		<vue-scroll class="table-box card-base card-outline">
-				<table class="styled striped hover" v-if="customerName!=null" >
-					<tbody>		
-						<el-row :gutter="20" >
-							<el-col :span="22" :offset="1">
-								<h3 class="bg-accent-lighter b-rad-14" style="padding: 8px;">
-									{{customerName}}
-								</h3>
-							</el-col>
-						</el-row>	
-						<el-row :gutter="20">										
-							<el-col :span="4" :offset="1">
-								<div class="item-box item-product">
-									<span>CONCEPTO</span>
-								</div>												
-								</el-col>	
-								<el-col :span="1" :offset="2">
-									<div class="item-box item-product">
-										<span>AÑO</span>
-									</div>												
-								</el-col>								
-								<el-col :span="1" :offset="1">
-									<div class="item-box item-product">
-										<span>MES</span>
-									</div>												
-								</el-col>																																			
-								<el-col :span="1" :offset="1">
-									<div class="item-box item-product">
-										<span>IMPORTE</span>
-									</div>												
-								</el-col>	
-								<el-col :span="1" :offset="2">
-									<div class="item-box item-product">
-										<span>PENDIENTE</span>
-									</div>												
+		<vue-scroll class="table-box card-base card-outline" v-if="customerName!=null">
+			<div class="list-container box grow flex column">				
+					<table class="styled striped hover" v-if="customerName!=null" >
+						<tbody>		
+							<el-row :gutter="20" >
+								<el-col :span="22" :offset="1">
+									<h3 class="bg-accent-lighter b-rad-14" style="padding: 8px;">
+										{{customerName}}
+									</h3>
 								</el-col>
-								<el-col :span="1" :offset="3">
+							</el-row>	
+							<el-row :gutter="20">										
+								<el-col :span="4" :offset="1">
 									<div class="item-box item-product">
-										<span>PAGA</span>
+										<span>CONCEPTO</span>
 									</div>												
-								</el-col>																						
-						</el-row>													
-					    <tr v-for="n in novelties" :key="n.noveltyId">																
-								<el-row :gutter="20">										
-									<el-col :span="4" :offset="1">
-										<div class="item-box item-product">
-											<h4 class="color-concept">{{n.concept}}</h4>
-										</div>												
 									</el-col>	
 									<el-col :span="1" :offset="2">
 										<div class="item-box item-product">
-											<h4 class="color-concept">{{n.year}}</h4>
+											<span>AÑO</span>
 										</div>												
 									</el-col>								
 									<el-col :span="1" :offset="1">
 										<div class="item-box item-product">
-											<h4 class="color-concept">{{n.month}}</h4>
+											<span>MES</span>
 										</div>												
-									</el-col>					
+									</el-col>																																			
 									<el-col :span="1" :offset="1">
 										<div class="item-box item-product">
-											<h4 class="color-concept">{{n.price}}</h4>
+											<span>IMPORTE</span>
 										</div>												
 									</el-col>	
 									<el-col :span="1" :offset="2">
 										<div class="item-box item-product">
-											<h4 class="color-concept">{{n.remainder-n.amount}}</h4>
-										</div>												
-									</el-col>																																																	
-									<el-col :span="1" :offset="2">
-										<div class="item-box item-product">
-											<div>												
-												<el-input-number
-													v-model="n.amount" 
-													:precision="2" 
-													:controls="false"
-													:value="0"
-													:min="0">
-												</el-input-number>
-											</div>
+											<span>PENDIENTE</span>
 										</div>												
 									</el-col>
-									<el-col :span="1" :offset="1">
-										<div class="item-box item-product switch">
-											<el-switch
-												v-model="n.copy"
-												active-color="#13ce66"
-												inactive-color="#ff4949"
-												@change="handleSwitch(n)">
-											</el-switch>
-										</div>
-									</el-col>							
-								</el-row>
-						</tr>
-						<span v-if="!hasData">No hay datos</span>
-					</tbody>
-				</table>
-			
-			</vue-scroll> 
-			
-
-		</div>	
+									<el-col :span="1" :offset="3">
+										<div class="item-box item-product">
+											<span>PAGA</span>
+										</div>												
+									</el-col>																						
+							</el-row>													
+							<tr v-for="n in novelties" :key="n.noveltyId">																
+									<el-row :gutter="20">										
+										<el-col :span="4" :offset="1">
+											<div class="item-box item-product">
+												<h4 class="color-concept">{{n.concept}}</h4>
+											</div>												
+										</el-col>	
+										<el-col :span="1" :offset="2">
+											<div class="item-box item-product">
+												<h4 class="color-concept">{{n.year}}</h4>
+											</div>												
+										</el-col>								
+										<el-col :span="1" :offset="1">
+											<div class="item-box item-product">
+												<h4 class="color-concept">{{n.month}}</h4>
+											</div>												
+										</el-col>					
+										<el-col :span="1" :offset="1">
+											<div class="item-box item-product">
+												<h4 class="color-concept">{{n.price}}</h4>
+											</div>												
+										</el-col>	
+										<el-col :span="1" :offset="2">
+											<div class="item-box item-product">
+												<h4 class="color-concept">{{n.remainder-n.amount}}</h4>
+											</div>												
+										</el-col>																																																	
+										<el-col :span="1" :offset="2">
+											<div class="item-box item-product">
+												<div>												
+													<el-input-number
+														v-model="n.amount" 
+														:precision="2" 
+														:controls="false"
+														:value="0"
+														:min="0">
+													</el-input-number>
+												</div>
+											</div>												
+										</el-col>
+										<el-col :span="1" :offset="1">
+											<div class="item-box item-product switch">
+												<el-switch
+													v-model="n.copy"
+													active-color="#13ce66"
+													inactive-color="#ff4949"
+													@change="handleSwitch(n)">
+												</el-switch>
+											</div>
+										</el-col>							
+									</el-row>
+							</tr>
+							<span v-if="!hasData">No hay datos</span>
+						</tbody>
+					</table>
+				
+				
+			</div>	
+		</vue-scroll> 					
 	</div>
 </template>
 
@@ -521,6 +520,10 @@ export default {
 
 	.el-checkbox  {
 		margin-right: 100%!important;	
+	}
+
+	.card-base {
+		width: 100%!important;
 	}
 
 	.switch {

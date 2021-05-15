@@ -1,6 +1,5 @@
 <template>
-	<div class="page-ecommerce-products flex">
-		
+	<div class="page-ecommerce-products flex">		
 		<div :class="{'sidebar':true, 'open':sidebarOpen}">
 			<vue-scroll class="scroller">
 				<div class="widget close-filter-box">
@@ -122,7 +121,6 @@
 			</vue-scroll> 
 
        		<el-button v-if="noveltiesFilter!=null" type="primary" v-on:click="save">GUARDAR</el-button>
-
 		</div>	
 	</div>
 </template>
@@ -177,7 +175,7 @@ export default {
 		}		
 		return this.novelties.filter(				
 			x => { 
-				return (x.customerName.includes(cliente) || cliente==null) 		
+				return (x.customerName.toUpperCase().includes(cliente) || cliente==null) 		
 				&& (this.checkedCustomers.length==0 || this.checkedCustomers.includes(x.customerId))
 			//	&& (x.novelties.concepts.includes(concepto) || concepto==null)
 			// x => { 

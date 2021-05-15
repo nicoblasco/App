@@ -219,7 +219,7 @@ export default {
 		getDoc(file) {
 			let me = this;
 			let url = me.URL_GET_DOCUMENTATION+ parseInt(file.id);
-            axios.get(url).then (function(response){
+            axios.get(url).then (function(response){ 
 				download(response.data,file.name);
 
             }).catch (function (error){
